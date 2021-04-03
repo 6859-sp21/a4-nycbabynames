@@ -1,6 +1,6 @@
 d3.csv("2011_baby_girl_sample.csv", convert_to_ints, function(data){
     var width = 600;
-    var height = 500;
+    var height = 540;
     var size = d3.scaleLinear()
                 .domain([0, 200]) // range on name counts
                 .range([5,35])  // circle will be between 7 and 55 px wide, need to play with this
