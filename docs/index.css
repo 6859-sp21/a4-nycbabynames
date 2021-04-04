@@ -6,6 +6,22 @@ h1 {
     color: white;
 }
 
+.filter-button {
+    font-size: 1.2rem;
+    padding: 5px;
+}
+
+.filter-content {
+  padding-top: 20px;
+}
+
+.filter-topic {
+    flex-direction: column;
+    /* text-align: center; */
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 .main {
     background-color: #f2f2f2;
     flex-basis: 75%;
