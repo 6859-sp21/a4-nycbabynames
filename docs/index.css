@@ -41,6 +41,10 @@ h1 {
     height: 100%;
 }
 
+#svgcontainer {
+  height: 100vh;
+}
+
 .sidebar-content {
     color: #a6a6a6;
     flex-basis: 95%;

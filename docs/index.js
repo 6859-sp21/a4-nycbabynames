@@ -1,13 +1,16 @@
-var width = 600;
-var height = 540;
+let container = document.querySelector('#svgcontainer')
+
+var width = container.offsetWidth;
+var height = container.offsetHeight;
+
 var size = d3.scaleLinear()
             .domain([0, 200]) // range on name counts
-            .range([5,35])  // circle will be between 7 and 55 px wide, need to play with this
+            .range([10,55])  // circle will be between 7 and 55 px wide, need to play with this
 
 var svg = d3.select("#svgcontainer")
             .append("svg")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", '100%')
+            .attr("height", '100%')
             .attr("text-anchor", "middle");
 
 
@@ -57,6 +60,6 @@ d3.csv("2011_baby_girl_sample.csv", convert_to_ints)
                 .attr("cy", function(d){ return d.y; })
                 text
                 .attr("x", function(d){ return d.x; })
-                .attr("y", function(d){ return d.y; })
+                .attr("y", function(d){ return d.y*1.005; })
             });
   });
