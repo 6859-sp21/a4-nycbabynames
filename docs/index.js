@@ -5,7 +5,7 @@ var height = container.offsetHeight;
 
 var size = d3.scaleLinear()
             .domain([0, 200]) // range on name counts
-            .range([10,55])  // circle will be between 7 and 55 px wide, need to play with this
+            .range([10,55]);  // circle will be between 7 and 55 px wide, need to play with this
 
 var svg = d3.select("#svgcontainer")
             .append("svg")
@@ -26,7 +26,7 @@ d3.csv("2011_baby_girl_sample.csv", convert_to_ints)
   .then(data => {
         var g = svg.selectAll("g")
                     .data(data)
-                    .join("g")
+                    .join("g");
 
         var node = g.append("circle")
                         .attr("r", function(d){ return size(d.Count)})
@@ -35,7 +35,7 @@ d3.csv("2011_baby_girl_sample.csv", convert_to_ints)
                         .style("fill", "#69b3a2")
                         .style("fill-opacity", 0.3)
                         .attr("stroke", "#69a2b2")
-                        .style("stroke-width", 2)
+                        .style("stroke-width", 2);
 
         var text = g.append('text')
                         .attr("x", width / 2)
@@ -50,7 +50,7 @@ d3.csv("2011_baby_girl_sample.csv", convert_to_ints)
         var simulation = d3.forceSimulation()
                         .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
                         .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
-                        .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(1)) // Force that avoids circle overlapping
+                        .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(1)); // Force that avoids circle overlapping
 
         simulation
             .nodes(data)
