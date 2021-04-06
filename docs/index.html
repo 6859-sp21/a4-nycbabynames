@@ -20,18 +20,21 @@
           <p>
             text text text description of this visualization, onboarding, etc and how to interact with it. Maybe we'll put the filters and sliders underneath this. Yada yada yada.
           </p>
-          <div class="filter-content">
+          <div class = "filter-content">
             <div class = "filter-topic">
               <h4> Gender </h4>
                 <input type="radio" name="gender" id="male-filter" class="filter-button" checked onclick="changeGender('male')"> <label class="filter-button"> Male </label> </input> <br>
                 <input type="radio" name="gender" id="female-filter" class="filter-button" onclick="changeGender('female')"> <label class="filter-button">Female</label> </input>
             </div>
             <div class = "filter-topic">
-              <h4> Ethnicity </h4>
-                <input type="checkbox" name="ethnicity" id="black-filter" class="filter-button" onclick="filterEthnicity('black')"> <label class="filter-button"> Black or African American</label> </input> <br>
-                <input type="checkbox" name="ethnicity" id="hispanic-filter" class="filter-button" onclick="filterEthnicity('hispanic')"> <label class="filter-button">Hispanic or Latinx</label> </input> <br>
-                <input type="checkbox" name="ethnicity" id="white-filter" class="filter-button" onclick="filterEthnicity('white')"> <label class="filter-button"> White non Hispanic</label> </input> <br>
-                <input type="checkbox" name="ethnicity" id="asian-filter" class="filter-button" onclick="filterEthnicity('asian')"> <label class="filter-button">Asian or Pacific Islander</label> </input>
+              <h4 style="padding-bottom: 10px"> Ethnicity </h4>
+                <select name="ethnicity" id="ethnicity" onchange="filterEthnicity()" class="filter-dropdown">
+                  <option value="ALL">All</option>
+                  <option value="ASIAN AND PACIFIC ISLANDER">Asian or Pacific Islander</option>
+                  <option value="BLACK NON HISPANIC">Black Non Hispanic</option>
+                  <option value="HISPANIC">Hispanic</option>
+                  <option value="WHITE NON HISPANIC">White Non Hispanic</option>
+                </select>
             </div>
           </div>
         </div>

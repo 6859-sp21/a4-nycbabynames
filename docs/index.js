@@ -1,5 +1,5 @@
 let container = document.querySelector('#svgcontainer');
-let ethnicities = ['black', 'white', 'hispanic', 'asian'];
+let ethnicities = 'ALL';
 let dataName = "male_names.csv";
 
 var width = container.offsetWidth;
@@ -27,14 +27,43 @@ function changeGender(genderInput) {
   applyData();
 }
 
-function filterEthnicity(ethnicity) {
-
+function filterEthnicity() {
+  ethnicities = document.getElementById('ethnicity').value;
+  applyData();
 }
 
 function applyData() {
   svg.selectAll("g").remove();
   d3.csv(dataName, convert_to_ints)
     .then(data => {
+          data = data.filter(d=>d["Year of Birth"]==2011);
+
+          if (ethnicities === 'ALL') {
+            // combine counts for multiple ethnicities
+            data.forEach(function(row) {
+              var count = data
+                .filter(d => d["Child's First Name"] === row["Child's First Name"])
+                .reduce(function(total, value) {
+                  return total + value.Count;
+                }, 0);
+              row.Count = count;
+            });
+
+            let names=[];
+            let combinedData=[];
+            data.forEach(function(row) {
+              var index = names.indexOf(row["Child's First Name"]);
+              if (index == -1) {
+                names.push(row["Child's First Name"]);
+                combinedData.push(row);
+              }
+            });
+
+            data = combinedData;
+          } else {
+            data = data.filter(d => d.Ethnicity === ethnicities);
+          }
+
           var topData = data.sort((a, b) => b.Count - a.Count).slice(0, 100);
 
           var size = d3.scaleLinear()
