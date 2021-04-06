@@ -23,15 +23,15 @@
           <div class="filter-content">
             <div class = "filter-topic">
               <h4> Gender </h4>
-                <input type="radio" name="gender" value="male" class="filter-button" checked> <label class="filter-button"> Male </label> </input> <br>
-                <input type="radio" name="gender" value="female" class="filter-button"> <label class="filter-button">Female</label> </input>
+                <input type="radio" name="gender" id="male-filter" class="filter-button" checked onclick="changeGender('male')"> <label class="filter-button"> Male </label> </input> <br>
+                <input type="radio" name="gender" id="female-filter" class="filter-button" onclick="changeGender('female')"> <label class="filter-button">Female</label> </input>
             </div>
             <div class = "filter-topic">
               <h4> Ethnicity </h4>
-                <input type="checkbox" name="ethnicity" value="black" class="filter-button"> <label class="filter-button"> Black or African American</label> </input> <br>
-                <input type="checkbox" name="ethnicity" value="hispanic" class="filter-button"> <label class="filter-button">Hispanic or Latinx</label> </input> <br>
-                <input type="checkbox" name="ethnicity" value="white" class="filter-button"> <label class="filter-button"> White non Hispanic</label> </input> <br>
-                <input type="checkbox" name="ethnicity" value="asian" class="filter-button"> <label class="filter-button">Asian or Pacific Islander</label> </input>
+                <input type="checkbox" name="ethnicity" id="black-filter" class="filter-button" onclick="filterEthnicity('black')"> <label class="filter-button"> Black or African American</label> </input> <br>
+                <input type="checkbox" name="ethnicity" id="hispanic-filter" class="filter-button" onclick="filterEthnicity('hispanic')"> <label class="filter-button">Hispanic or Latinx</label> </input> <br>
+                <input type="checkbox" name="ethnicity" id="white-filter" class="filter-button" onclick="filterEthnicity('white')"> <label class="filter-button"> White non Hispanic</label> </input> <br>
+                <input type="checkbox" name="ethnicity" id="asian-filter" class="filter-button" onclick="filterEthnicity('asian')"> <label class="filter-button">Asian or Pacific Islander</label> </input>
             </div>
           </div>
         </div>

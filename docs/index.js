@@ -1,18 +1,15 @@
-let container = document.querySelector('#svgcontainer')
+let container = document.querySelector('#svgcontainer');
+let ethnicities = ['black', 'white', 'hispanic', 'asian'];
+let dataName = "male_names.csv";
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
-
-var size = d3.scaleLinear()
-            .domain([0, 200]) // range on name counts
-            .range([10,55]);  // circle will be between 7 and 55 px wide, need to play with this
 
 var svg = d3.select("#svgcontainer")
             .append("svg")
             .attr("width", '100%')
             .attr("height", '100%')
             .attr("text-anchor", "middle");
-
 
 function convert_to_ints(d){
     d.Rank = +d.Rank;
@@ -21,45 +18,68 @@ function convert_to_ints(d){
     return d;
 }
 
+function changeGender(genderInput) {
+  if (genderInput==='male') {
+    dataName = "male_names.csv";
+  } else {
+    dataName = "female_names.csv";
+  }
+  applyData();
+}
 
-d3.csv("2011_baby_girl_sample.csv", convert_to_ints)
-  .then(data => {
-        var g = svg.selectAll("g")
-                    .data(data)
-                    .join("g");
+function filterEthnicity(ethnicity) {
 
-        var node = g.append("circle")
-                        .attr("r", function(d){ return size(d.Count)})
-                        .attr("cx", width / 2) // initial location within SVG rectangle
-                        .attr("cy", height / 2) // initial location within SVG rectangle
-                        .style("fill", "#69b3a2")
-                        .style("fill-opacity", 0.3)
-                        .attr("stroke", "#69a2b2")
-                        .style("stroke-width", 2);
+}
 
-        var text = g.append('text')
-                        .attr("x", width / 2)
-                        .attr("y", height / 2)
-                        .attr('text-anchor', "middle")
-                        .attr("font-size", function(d) {
-                            return Math.round(size(d.Count)/3) + 'px';
-                        })
-                        .text(d => d["Child's First Name"]);
+function applyData() {
+  svg.selectAll("g").remove();
+  d3.csv(dataName, convert_to_ints)
+    .then(data => {
+          var topData = data.sort((a, b) => b.Count - a.Count).slice(0, 100);
+
+          var size = d3.scaleLinear()
+                      .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
+                      .range([width/80, width/20]);  // circle will be between 7 and 55 px wide, need to play with this
+
+          var g = svg.selectAll("g")
+                      .data(topData)
+                      .join("g");
+
+          var node = g.append("circle")
+                          .attr("r", function(d){ return size(d.Count)})
+                          .attr("cx", width / 2) // initial location within SVG rectangle
+                          .attr("cy", height / 2) // initial location within SVG rectangle
+                          .style("fill", "#69b3a2")
+                          .style("fill-opacity", 0.3)
+                          .attr("stroke", "#69a2b2")
+                          .style("stroke-width", 2);
+
+          var text = g.append('text')
+                          .attr("x", width / 2)
+                          .attr("y", height / 2)
+                          .attr('text-anchor', "middle")
+                          .attr("font-size", function(d) {
+                              return Math.round(size(d.Count)/3) + 'px';
+                          })
+                          .text(d => d["Child's First Name"]);
 
 
-        var simulation = d3.forceSimulation()
-                        .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
-                        .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
-                        .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(1)); // Force that avoids circle overlapping
+          var simulation = d3.forceSimulation()
+                          .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+                          .force("charge", d3.forceManyBody().strength(.1)) // Nodes are attracted one each other of value is > 0
+                          .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(1)); // Force that avoids circle overlapping
 
-        simulation
-            .nodes(data)
-            .on("tick", function(d){
-                node
-                .attr("cx", function(d){ return d.x; })
-                .attr("cy", function(d){ return d.y; })
-                text
-                .attr("x", function(d){ return d.x; })
-                .attr("y", function(d){ return d.y*1.005; })
-            });
-  });
+          simulation
+              .nodes(topData)
+              .on("tick", function(d){
+                  node
+                  .attr("cx", function(d){ return d.x; })
+                  .attr("cy", function(d){ return d.y; })
+                  text
+                  .attr("x", function(d){ return d.x; })
+                  .attr("y", function(d){ return d.y*1.005; })
+              });
+    });
+  }
+
+  applyData();
