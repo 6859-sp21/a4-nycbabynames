@@ -32,11 +32,18 @@ function filterEthnicity() {
   applyData();
 }
 
+document.getElementById("year-filter").addEventListener("input", e=>{
+  let year = e.target.value;
+  document.getElementById("year-selected").innerHTML = year;
+  applyData();
+});
+
 function applyData() {
   svg.selectAll("g").remove();
   d3.csv(dataName, convert_to_ints)
     .then(data => {
-          data = data.filter(d=>d["Year of Birth"]==2011);
+          let year = document.getElementById("year-filter").value
+          data = data.filter(d=>d["Year of Birth"]==year);
 
           if (ethnicities === 'ALL') {
             // combine counts for multiple ethnicities
@@ -72,7 +79,14 @@ function applyData() {
 
           var g = svg.selectAll("g")
                       .data(topData)
-                      .join("g");
+                      .join(
+                        enter  => {
+                          // enter.append('g')
+                          return enter.append('g');
+                        },
+                        update => update,
+                        exit => exit.remove()
+                      )
 
           var node = g.append("circle")
                           .attr("r", function(d){ return size(d.Count)})
