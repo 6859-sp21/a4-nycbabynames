@@ -29,7 +29,7 @@ function changeGender(genderInput) {
 
 function filterEthnicity() {
   ethnicities = document.getElementById('ethnicity').value;
-  applyData();
+  applyData(true);
 }
 
 document.getElementById("year-filter").addEventListener("input", e=>{
@@ -50,7 +50,11 @@ var simulation = d3.forceSimulation()
                     });
 var persistent_data = [];
 
-function applyData() {
+function applyData(forceRefresh) {
+  if (forceRefresh) {
+    persistent_data = []
+    svg.selectAll('g').remove()
+  }
   d3.csv(dataName, convert_to_ints)
     .then(data => {
           simulation.stop();
