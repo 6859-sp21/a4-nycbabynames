@@ -74,6 +74,7 @@ function applyData() {
             data.forEach(function(row) {
               var index = names.indexOf(row["Child's First Name"]);
               if (index == -1) {
+                row.Ethnicity = 'All'
                 names.push(row["Child's First Name"]);
                 combinedData.push(row);
               }
@@ -140,8 +141,10 @@ function applyData() {
           persistent_data = persistent_data.filter(d=>{
               let removed=true;
               topData.forEach(newD => {
-                if (newD["Child's First Name"] == d["Child's First Name"])
+                if (newD["Child's First Name"] == d["Child's First Name"]) {
+                  d.Count = newD.Count;
                   removed = false;
+                }
               })
               return !removed;
           })
