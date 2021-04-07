@@ -75,6 +75,7 @@ function applyData() {
             data.forEach(function(row) {
               var index = names.indexOf(row["Child's First Name"]);
               if (index == -1) {
+                row.Ethnicity = 'All'
                 names.push(row["Child's First Name"]);
                 combinedData.push(row);
               }
