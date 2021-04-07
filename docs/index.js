@@ -1,5 +1,4 @@
 let container = document.querySelector('#svgcontainer');
-let ethnicities = 'ALL';
 let dataName = "male_names.csv";
 
 var width = container.offsetWidth;
@@ -28,7 +27,6 @@ function changeGender(genderInput) {
 }
 
 function filterEthnicity() {
-  ethnicities = document.getElementById('ethnicity').value;
   applyData();
 }
 
@@ -39,8 +37,11 @@ document.getElementById("year-filter").addEventListener("input", e=>{
 });
 
 var simulation = d3.forceSimulation()
+                    .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+                    .force("charge", d3.forceManyBody().strength(1)) // Nodes are attracted one each other of value is > 0
+                    .force('x', d3.forceX().strength(.001).x(width/2))
+                    .force('y', d3.forceY().strength(.001).y(height/2))
                     .on("tick", function(d){
-                        console.log('running')
                         svg.selectAll("circle")
                           .attr("cx", function(d){ return d.x; })
                           .attr("cy", function(d){ return d.y; })
@@ -57,7 +58,7 @@ function applyData() {
 
           let year = document.getElementById("year-filter").value
           data = data.filter(d=>d["Year of Birth"]==year);
-
+          let ethnicities = document.getElementById('ethnicity').value;
           if (ethnicities === 'ALL') {
             // combine counts for multiple ethnicities
             data.forEach(function(row) {
@@ -89,73 +90,60 @@ function applyData() {
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
                       .range([width/80, width/20]);  // circle will be between 7 and 55 px wide, need to play with this
 
-          var g = svg.selectAll("g")
-                      .data(topData, d=>d["Child's First Name"])
-                      .join(
-                        enter  => {
-                          let ig = enter.append('g');
-                          ig.append("circle")
-                                          .attr("r", function(d){ return size(d.Count)})
-                                          .style("fill", "#69b3a2")
-                                          .style("fill-opacity", 0.3)
-                                          .attr("stroke", "#69a2b2")
-                                          .style("stroke-width", 2);
-                          ig.append('text')
-                                          .attr('text-anchor', "middle")
-                                          .attr("font-size", function(d) {
-                                              return Math.round(size(d.Count)/3) + 'px';
-                                          })
-                                          .text(d => d["Child's First Name"])
-                          return ig;
-                        },
-                        update => {
-                          svg.selectAll("circle")
-                                          .transition()
-                                          .duration(500)
-                                          .attr("r", function(d){ return size(d.Count)})
-                        svg.selectAll('text')
-                                        .attr("x", width / 2)
-                                        .attr("y", height / 2)
-                                        .attr("font-size", function(d) {
-                                            return Math.round(size(d.Count)/3) + 'px';
-                                        })
-                          return update;
-                        },
-                        exit => exit.remove()
-                      )
+          var g = svg.selectAll("g").data(topData, d=>d["Child's First Name"]);
+          var gEnter = g.enter().append("g");
+
+          g.exit().remove();
+          gEnter.append("circle")
+              .attr("class", function(d) {return d["Child's First Name"]})
+              .attr("r", function(d){ return size(d.Count)})
+              .style("fill", "#69b3a2")
+              .style("fill-opacity", 0.3)
+              .attr("stroke", "#69a2b2")
+              .style("stroke-width", 2);
+
+          gEnter.append('text')
+              .attr('text-anchor', "middle")
+              .attr("font-size", function(d) {
+                  return Math.round(size(d.Count)/3) + 'px';
+              })
+              .text(d => d["Child's First Name"]);
+
+          g.select("circle")
+            .attr("r", function(d) { console.log(d.Count, size(d.Count)); return size(d.Count)});
+
+          g.select('text')
+              .attr("x", width / 2)
+              .attr("y", height / 2)
+              .attr("font-size", function(d) {
+                  return Math.round(size(d.Count)/3) + 'px';
+              });
 
           // 🤮 yucky gross way to preserve the state info that the simulation needs
+          var new_data = [];
           topData.forEach(d => {
             let alreadyPresent = false;
             persistent_data.forEach(oldD=>{
-              if (oldD["Child's First Name"] == d["Child's First Name"])
+              if (oldD["Child's First Name"] == d["Child's First Name"]) {
                 alreadyPresent = true;
+                d.x = oldD.x;
+                d.y = oldD.y;
+                d.vx = oldD.vx;
+                d.vy = oldD.vy;
+                new_data.push(d);
+              }
             });
             if (!alreadyPresent) {
               d.x=width/2;
               d.y=height/2;
-              persistent_data.push(d)
+              new_data.push(d);
             }
           })
-          persistent_data = persistent_data.filter(d=>{
-              let removed=true;
-              topData.forEach(newD => {
-                if (newD["Child's First Name"] == d["Child's First Name"])
-                  removed = false;
-              })
-              return !removed;
-          })
-
-          console.log(persistent_data)
+          persistent_data = new_data;
 
           simulation.nodes(persistent_data)
-                          .force('x', d3.forceX().strength(.001).x(width/2))
-                          .force('y', d3.forceY().strength(.001).y(height/2))
-                          .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(5))
-                          .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
-                          .force("charge", d3.forceManyBody().strength(1)) // Nodes are attracted one each other of value is > 0
-                          .alpha(1).restart()
-
+            .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(5))
+            .alpha(1).restart();
     });
   }
 
