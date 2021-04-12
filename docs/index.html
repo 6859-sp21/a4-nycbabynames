@@ -16,7 +16,7 @@
     <div class = "window">
       <div class = "sidebar">
         <div class = "sidebar-content">
-          <h1>NYC Baby Names</h1>
+          <h2>NYC Baby Names</h2>
           <p>
             Use this tool to explore popular baby names in NYC for the years of 2011 to 2017. <br> <br>
 
@@ -25,12 +25,12 @@
           </p>
           <div class = "filter-content">
             <div class = "filter-topic">
-              <h4> Gender </h4>
+              <h5> Gender </h5>
                 <input type="radio" name="gender" id="male-filter" class="filter-button" checked onclick="changeGender('male')"> <label class="filter-button"> Male </label> </input> <br>
                 <input type="radio" name="gender" id="female-filter" class="filter-button" onclick="changeGender('female')"> <label class="filter-button">Female</label> </input>
             </div>
             <div class = "filter-topic">
-              <h4 style="padding-bottom: 10px"> Ethnicity </h4>
+              <h5 style="padding-bottom: 10px"> Ethnicity </h5>
                 <select name="ethnicity" id="ethnicity" onchange="filterEthnicity()" class="filter-dropdown">
                   <option value="ALL">All</option>
                   <option value="ASIAN AND PACIFIC ISLANDER">Asian or Pacific Islander</option>
@@ -40,7 +40,7 @@
                 </select>
             </div>
             <div id="filter-year">
-              <h4>Year</h4>
+              <h5>Year</h5>
               <input id="year-filter" type="range" class="form-range" value="2011" min="2011" max="2017" step="1" v-model="year">
               <text id="year-selected">2011</text>
             </div>
