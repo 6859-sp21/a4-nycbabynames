@@ -1,5 +1,6 @@
 let container = document.querySelector('#svgcontainer');
 let dataName = "male_names.csv";
+let searchOn = false;
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -87,17 +88,32 @@ function changeGender(genderInput) {
     dataName = "female_names.csv";
     label.select("text.gender").text("Female");
   }
-  applyData();
+  if (searchOn) {
+    search_name = document.getElementById("search-box").value
+    applySearchView(search_name)
+  }
+  else {
+    applyData();
+  }
+
 }
 
 function filterEthnicity() {
-  applyData();
   let ethnicities = document.getElementById('ethnicity').value;
   if (ethnicities == "ALL") {
     label.select("text.ethnicity").text("");
   } else {
     label.select("text.ethnicity").text(ethnicities);
   }
+
+  if (searchOn) {
+    search_name = document.getElementById("search-box").value
+    applySearchView(search_name)
+  }
+  else {
+    applyData();
+  }
+
   resetZoom();
 }
 
@@ -106,33 +122,61 @@ document.getElementById("year-filter").addEventListener("input", e=>{
   document.getElementById("year-selected").innerHTML = year;
   label.select("text.year").text(year);
 
-  applyData();
+  if (searchOn) {
+    search_name = document.getElementById("search-box").value
+    applySearchView(search_name)
+  }
+  else {
+    applyData();
+  }
 });
 
 document.getElementById("search-button").addEventListener("click", e=>{
+  searchOn = true;
   search_name = document.getElementById("search-box").value
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
   name_element.style.fontSize = '5rem'
   name_element.style.justifyContent = 'center'
+  cancel_button = document.getElementById("cancel")
+  cancel_button.style.display = 'flex'
+  cancel_button.style.marginTop = '10px'
+  cancel_button.style.marginRight = '10px'
+  applySearchView(search_name);
+});
+
+document.getElementById("cancel").addEventListener("click", e=> {
+  searchOn = false;
+  name_element.style.display = 'none'
+  cancel_button.style.display = 'none'
+  svg.selectAll("text").remove() // the text from old charts
+  svg.selectAll("rect").remove() // remove previous chart
+  svg.selectAll("path").remove() // remove previous chart axis
+  applyData();
+})
+
+function applySearchView(search_name) {
   svg.selectAll("circle").remove(); // remove bubble view
   svg.selectAll("text").remove() // the text from the bubbles and old charts
   svg.selectAll("rect").remove() // remove previous chart
   svg.selectAll("path").remove() // remove previous chart axis
   svg.attr("text-anchor", null);
-  applySearchView(search_name);
-});
-
-function applySearchView(search_name) {
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
+          data = data.slice().sort((a, b) => d3.descending(a.Ethnicity, b.Ethnicity))
           let year = document.getElementById("year-filter").value
+          if (document.getElementById("male-filter").checked) {
+            var gender = "MALE";
+          }
+          else {
+            var gender = "FEMALE";
+          }
           data = data.filter(d=>d["Year of Birth"] == year);
+          data = data.filter(d=>d["Gender"] == gender);
+
           name_results = data.filter(d=>d["Child's First Name"] == search_name);
           if (name_results.length == 0) {
-            // TODO: add a no results found page
-            console.log("no results found")
             var search_label = svg.append("g");
 
               search_label.append("text")
@@ -146,7 +190,7 @@ function applySearchView(search_name) {
 
               search_label.append("text")
                 .attr("class", "line2")
-                .text("for " + search_name + "." )
+                .text("for " + gender + " " + search_name + " in " + year ) // TODO: lowercase male
                 .style("font-size", "3rem")
                 .attr("text-anchor", "start")
                 .attr("x", "5rem")
@@ -167,7 +211,7 @@ function applySearchView(search_name) {
             var i = 0
 
             for (item in name_results) {
-              name_results[i].key = i
+              name_results[i].key = i // ethnicities are not all in the same place the whole time, i think if i sort then it should be fine?
               i = i + 1
             }
 
@@ -180,7 +224,9 @@ function applySearchView(search_name) {
                 .domain([0, d3.max(name_results, d => d.Count)])
                 .range([0, width/2]) // px
 
-            svg.selectAll('rect')
+            var search = svg.append("g");
+
+            search.selectAll('rect')
                 .data(name_results)
                 .join('rect')
                   .attr('x', width/4)
@@ -191,7 +237,7 @@ function applySearchView(search_name) {
                   .style('stroke', function(d) {return colors[d.Ethnicity]})
                   .style("fill-opacity", 0.3)
 
-            svg.selectAll('text')
+            search.selectAll('text')
                 .data(name_results)
                 .join('text')
                   .attr('x', d => width/4 + xScale(d.Count))
@@ -206,7 +252,7 @@ function applySearchView(search_name) {
                 .attr("transform", `translate(${width/4},${height/8})`)
                 .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
             
-            svg.append("g")
+            search.append("g")
                   .call(yAxis);
           }
        });
