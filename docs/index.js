@@ -59,7 +59,6 @@ function rank(i) {
 }
 
 function createTooltip(e, d) {
-  console.log(d)
   tooltip.style('display', 'inherit');
   tooltip.append('p').text(d["Child's First Name"]);
   let ul = tooltip.append('ul');
@@ -130,7 +129,6 @@ function filter(data, year, ethnicities) {
 }
 
 function augmentData(topData, prev) {
-  console.log('prev', prev)
   topData.forEach(d => {
     prev.forEach(prevD => {
       if (prevD["Child's First Name"] == d["Child's First Name"])
@@ -148,7 +146,6 @@ function applyData() {
           let ethnicities = document.getElementById('ethnicity').value;
 
           let prev = filter(data, year-1, ethnicities);
-          console.log('out prev', prev)
           var topData = filter(data, year, ethnicities);
           augmentData(topData, prev);
 
