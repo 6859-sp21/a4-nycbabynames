@@ -8,10 +8,33 @@ var svg = d3.select("#svgcontainer")
             .append("svg")
             .attr("width", '100%')
             .attr("height", '100%')
-            .attr("text-anchor", "middle");
+            .attr("text-anchor", "middle")
+            .attr("viewBox", [0,0,width, height]);
+
+const view = svg.append("g")
+      .attr("cursor", "grab");
+
+var zoom = d3.zoom()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([1, 8])
+      .on("zoom", zoomed);
+
+svg.call(zoom);
 
 let tooltip = d3.select("#svgcontainer").append('div')
                   .attr('class', 'tooltp')
+
+function zoomed({transform}) {
+    view.attr("transform", transform);
+}
+
+function resetZoom() {
+  svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity,
+      d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
+    );
+}
 
 function convert_to_ints(d){
     d.Rank = +d.Rank;
@@ -31,6 +54,7 @@ function changeGender(genderInput) {
 
 function filterEthnicity() {
   applyData();
+  resetZoom();
 }
 
 document.getElementById("year-filter").addEventListener("input", e=>{
@@ -50,9 +74,9 @@ document.getElementById("search-button").addEventListener("click", e=>{
 });
 
 function applySearchView(search_name) {
-  svg.selectAll("circle").remove(); // remove bubble view
-  svg.selectAll("text").remove() // the text from the bubbles
-  svg.attr("text-anchor", null);
+  view.selectAll("circle").remove(); // remove bubble view
+  view.selectAll("text").remove() // the text from the bubbles
+  view.attr("text-anchor", null);
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
           let year = document.getElementById("year-filter").value
@@ -69,7 +93,7 @@ function applySearchView(search_name) {
               name_results[i].key = i
               i = i + 1
             }
-            
+
             yScale = d3.scaleBand()
                 .domain(name_results.map(d => d.key))
                 .range([60, 0]) // px
@@ -78,8 +102,8 @@ function applySearchView(search_name) {
                 .domain([0, d3.max(name_results, d => d.Count)])
                 .range([0, 100]) // px
 
-            
-            svg.selectAll('rect')
+
+            view.selectAll('rect')
                 .data(name_results)
                 .join('rect')
                   .attr('x', width/2)
@@ -88,8 +112,8 @@ function applySearchView(search_name) {
                   .attr('height', yScale.bandwidth())   // Band scales divide a pixel range into equally-sized bands
                   .style('fill','black')
                   .style('stroke', 'white')
-              
-            svg.selectAll('text')
+
+            view.selectAll('text')
                 .data(name_results)
                 .join('text')
                   .attr('x', d => xScale(d.Count))
@@ -104,15 +128,15 @@ function applySearchView(search_name) {
 }
 
 var simulation = d3.forceSimulation()
-                    .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
+                    .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the view area
                     .force("charge", d3.forceManyBody().strength(1)) // Nodes are attracted one each other of value is > 0
                     .force('x', d3.forceX().strength(.001).x(width/2))
                     .force('y', d3.forceY().strength(.001).y(height/2))
                     .on("tick", function(d){
-                        svg.selectAll("circle")
+                        view.selectAll("circle")
                           .attr("cx", function(d){ return d.x; })
                           .attr("cy", function(d){ return d.y; })
-                        svg.selectAll("text")
+                        view.selectAll("text")
                           .attr("x", function(d){ return d.x; })
                           .attr("y", function(d){ return d.y*1.005; })
                     });
@@ -217,7 +241,7 @@ function applyData() {
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
                       .range([width/80, width/20]);  // circle will be between 7 and 55 px wide, need to play with this
 
-          var g = svg.selectAll("g").data(topData, d=>d["Child's First Name"]);
+          var g = view.selectAll("g").data(topData, d=>d["Child's First Name"]);
           var gEnter = g.enter().append("g");
 
           g.exit().remove();
