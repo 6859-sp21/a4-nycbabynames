@@ -95,7 +95,6 @@ function changeGender(genderInput) {
   else {
     applyData();
   }
-
 }
 
 function filterEthnicity() {
@@ -147,12 +146,14 @@ document.getElementById("search-button").addEventListener("click", e=>{
 });
 
 document.getElementById("cancel").addEventListener("click", e=> {
-  searchOn = false;
+  searchOn = false; // no longer in search view
   name_element.style.display = 'none'
   cancel_button.style.display = 'none'
   svg.selectAll("text").remove() // the text from old charts
   svg.selectAll("rect").remove() // remove previous chart
   svg.selectAll("path").remove() // remove previous chart axis
+  svg.selectAll("g.yAxis").remove() // remove line from axis
+  svg.selectAll("g.tick").remove() // remove ticks from axis
   applyData();
 })
 
@@ -161,6 +162,9 @@ function applySearchView(search_name) {
   svg.selectAll("text").remove() // the text from the bubbles and old charts
   svg.selectAll("rect").remove() // remove previous chart
   svg.selectAll("path").remove() // remove previous chart axis
+  svg.selectAll("g.yAxis").remove()
+  svg.selectAll("g.tick").remove()
+  svg.selectAll("g.bubble").remove() // remove all gs as well
   svg.attr("text-anchor", null);
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
@@ -190,7 +194,7 @@ function applySearchView(search_name) {
 
               search_label.append("text")
                 .attr("class", "line2")
-                .text("for " + gender + " " + search_name + " in " + year ) // TODO: lowercase male
+                .text("for " + gender.toLowerCase() + " " + search_name + " in " + year )
                 .style("font-size", "3rem")
                 .attr("text-anchor", "start")
                 .attr("x", "5rem")
@@ -250,6 +254,7 @@ function applySearchView(search_name) {
             
             yAxis = g => g
                 .attr("transform", `translate(${width/4},${height/8})`)
+                .attr("class", "yAxis")
                 .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
             
             search.append("g")
@@ -370,10 +375,10 @@ function applyData() {
 
           var size = d3.scaleLinear()
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
-                      .range([width/80, width/20]);  // circle will be between 7 and 55 px wide, need to play with this
+                      .range([width/80, width/20]); 
 
           var g = view.selectAll("g").data(topData, d=>d["Child's First Name"]);
-          var gEnter = g.enter().append("g");
+          var gEnter = g.enter().append("g").attr("class", "bubble");
 
           g.exit().remove();
           gEnter.append("circle")
