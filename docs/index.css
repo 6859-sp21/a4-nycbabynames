@@ -59,8 +59,6 @@ h1 {
 
 .search-name {
     display: none;
-    /* font-size: 5rem;
-    justify-content: center; */
 }
 
 .search-section {
@@ -93,6 +91,11 @@ h1 {
     margin: 10px;
     padding: 10px;
 }
+
+/* remove tick lines on search view */
+.tick line{
+    visibility:hidden; 
+  }
 
 .window {
     display: flex;

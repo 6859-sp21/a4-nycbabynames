@@ -116,13 +116,15 @@ document.getElementById("search-button").addEventListener("click", e=>{
   name_element.style.display = 'flex'
   name_element.style.fontSize = '5rem'
   name_element.style.justifyContent = 'center'
+  svg.selectAll("circle").remove(); // remove bubble view
+  svg.selectAll("text").remove() // the text from the bubbles and old charts
+  svg.selectAll("rect").remove() // remove previous chart
+  svg.selectAll("path").remove() // remove previous chart axis
+  svg.attr("text-anchor", null);
   applySearchView(search_name);
 });
 
 function applySearchView(search_name) {
-  view.selectAll("circle").remove(); // remove bubble view
-  view.selectAll("text").remove() // the text from the bubbles
-  view.attr("text-anchor", null);
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
           let year = document.getElementById("year-filter").value
@@ -131,6 +133,35 @@ function applySearchView(search_name) {
           if (name_results.length == 0) {
             // TODO: add a no results found page
             console.log("no results found")
+            var search_label = svg.append("g");
+
+              search_label.append("text")
+                .attr("class", "line1")
+                .text("Sorry, there are no results")
+                .style("font-size", "3rem")
+                .attr("text-anchor", "start")
+                .attr("x", "5rem")
+                .attr("y", "5rem")
+                .style("fill-opacity", 0.7);
+
+              search_label.append("text")
+                .attr("class", "line2")
+                .text("for " + search_name + "." )
+                .style("font-size", "3rem")
+                .attr("text-anchor", "start")
+                .attr("x", "5rem")
+                .attr("y", "8rem")
+                .style("fill-opacity", 0.7);
+
+              search_label.append("text")
+                .attr("class", "line3")
+                .text("Please try again.")
+                .style("font-size", "3rem")
+                .attr("text-anchor", "start")
+                .attr("x", "5rem")
+                .attr("y", "11rem")
+                .style("fill-opacity", 0.7);
+
           }
           else {
             var i = 0
@@ -142,33 +173,41 @@ function applySearchView(search_name) {
 
             yScale = d3.scaleBand()
                 .domain(name_results.map(d => d.key))
-                .range([60, 0]) // px
+                .range([height/3, 0]) // px
+                .padding(0.2)
 
             xScale = d3.scaleLinear()
                 .domain([0, d3.max(name_results, d => d.Count)])
-                .range([0, 100]) // px
+                .range([0, width/2]) // px
 
-
-            view.selectAll('rect')
+            svg.selectAll('rect')
                 .data(name_results)
                 .join('rect')
-                  .attr('x', width/2)
-                  .attr('y', d => {return yScale(d.key) + height/4})        // Use the "yScale" here instead of manually positioning bars
+                  .attr('x', width/4)
+                  .attr('y', d => {return yScale(d.key) + height/8})        // Use the "yScale" here instead of manually positioning bars
                   .attr('width', d => {return xScale(d.Count)})
-                  .attr('height', yScale.bandwidth())   // Band scales divide a pixel range into equally-sized bands
-                  .style('fill','black')
-                  .style('stroke', 'white')
+                  .attr('height', yScale.bandwidth())  // because range is 0 to h/3, each band is h/12 in height // Band scales divide a pixel range into equally-sized bands
+                  .style('fill', function(d) {return colors[d.Ethnicity]})
+                  .style('stroke', function(d) {return colors[d.Ethnicity]})
+                  .style("fill-opacity", 0.3)
 
-            view.selectAll('text')
+            svg.selectAll('text')
                 .data(name_results)
                 .join('text')
-                  .attr('x', d => xScale(d.Count))
-                  .attr('y', d => yScale(d.key))   // Use the "yScale" here instead of manually positioning labels
-                  .attr('dx', 20)
-                  .attr('dy', '1em')
-                  .attr('fill', 'black')
-                  .style('font-size', 'small')
-                  // .text(d => d.Count)
+                  .attr('x', d => width/4 + xScale(d.Count))
+                  .attr('y', d => yScale(d.key) + height/8 )   // Use the "yScale" here instead of manually positioning labels
+                  .attr('dx', 10)
+                  .attr('dy', yScale.bandwidth()/2 + 5) // unsure what the conversion to rem is here
+                  .attr('fill', '#404040')
+                  .style('font-size', 'medium')
+                  .text(d => d.Count)
+            
+            yAxis = g => g
+                .attr("transform", `translate(${width/4},${height/8})`)
+                .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
+            
+            svg.append("g")
+                  .call(yAxis);
           }
        });
 }
