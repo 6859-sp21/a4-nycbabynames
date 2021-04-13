@@ -10,6 +10,9 @@ var svg = d3.select("#svgcontainer")
             .attr("height", '100%')
             .attr("text-anchor", "middle");
 
+let tooltip = d3.select("#svgcontainer").append('div')
+                  .attr('class', 'tooltp')
+
 function convert_to_ints(d){
     d.Rank = +d.Rank;
     d.Count = +d.Count;
@@ -51,42 +54,104 @@ var simulation = d3.forceSimulation()
                     });
 var persistent_data = [];
 
+function rank(i) {
+  return i > 0 ? "+"+i : i;
+}
+
+function createTooltip(e, d) {
+  console.log(d)
+  tooltip.style('display', 'inherit');
+  tooltip.append('p').text(d["Child's First Name"]);
+  let ul = tooltip.append('ul');
+  ul.append('li').text('Babies: ' + d.Count);
+  ul.append('li').text('Rank Within Selection: ' + (d.selRank));
+  ul.append('li').text('National Rank: ' + d.natRank);
+  if (d.delta) {
+    let delta = d.delta-d.selRank;
+    let li = ul.append('li');
+    li.text('Change From Prev Year: ' + rank(delta));
+    let imgSrc = delta>0 ? 'arrow.svg' : 'down-arrow.svg';
+    if (delta !== 0) {
+      li.append('img')
+        .attr('src', imgSrc)
+        .attr('width', '12px')
+    }
+
+  }
+  updateTooltip(e,d);
+}
+
+function updateTooltip(e, d) {
+  tooltip
+    .style('left', e.pageX+15+"px")
+    .style('top', e.pageY-170+"px")
+}
+
+function removeTooltip(e, d) {
+  tooltip.selectAll('p').remove();
+  tooltip.selectAll('ul').remove();
+  tooltip.style('display', 'none');
+}
+
+function filter(data, year, ethnicities) {
+  yearData = data.filter(d=>d["Year of Birth"]==year);
+  if (ethnicities === 'ALL') {
+    // combine counts for multiple ethnicities
+    yearData.forEach(function(row) {
+      var count = yearData
+        .filter(d => d["Child's First Name"] === row["Child's First Name"])
+        .reduce(function(total, value) {
+          return total + value.Count;
+        }, 0);
+      row.Count = count;
+    });
+
+    let names=[];
+    let combinedData=[];
+    yearData.forEach(function(row) {
+      var index = names.indexOf(row["Child's First Name"]);
+      if (index == -1) {
+        row.Ethnicity = 'All'
+        names.push(row["Child's First Name"]);
+        combinedData.push(row);
+      }
+    });
+
+    yearData = combinedData;
+  } else {
+    yearData = yearData.filter(d => d.Ethnicity === ethnicities);
+  }
+
+  let out = yearData.sort((a, b) => b.Count - a.Count).slice(0, 100);
+  out.forEach((d,i) => {
+    d.selRank = i+1;
+  })
+  return out
+}
+
+function augmentData(topData, prev) {
+  console.log('prev', prev)
+  topData.forEach(d => {
+    prev.forEach(prevD => {
+      if (prevD["Child's First Name"] == d["Child's First Name"])
+        d.delta = prevD.selRank;
+    })
+  })
+}
+
 function applyData() {
   d3.csv(dataName, convert_to_ints)
     .then(data => {
           simulation.stop();
 
-          let year = document.getElementById("year-filter").value
-          data = data.filter(d=>d["Year of Birth"]==year);
+          let year = document.getElementById("year-filter").value;
           let ethnicities = document.getElementById('ethnicity').value;
-          if (ethnicities === 'ALL') {
-            // combine counts for multiple ethnicities
-            data.forEach(function(row) {
-              var count = data
-                .filter(d => d["Child's First Name"] === row["Child's First Name"])
-                .reduce(function(total, value) {
-                  return total + value.Count;
-                }, 0);
-              row.Count = count;
-            });
 
-            let names=[];
-            let combinedData=[];
-            data.forEach(function(row) {
-              var index = names.indexOf(row["Child's First Name"]);
-              if (index == -1) {
-                row.Ethnicity = 'All'
-                names.push(row["Child's First Name"]);
-                combinedData.push(row);
-              }
-            });
+          let prev = filter(data, year-1, ethnicities);
+          console.log('out prev', prev)
+          var topData = filter(data, year, ethnicities);
+          augmentData(topData, prev);
 
-            data = combinedData;
-          } else {
-            data = data.filter(d => d.Ethnicity === ethnicities);
-          }
-
-          var topData = data.sort((a, b) => b.Count - a.Count).slice(0, 100);
           var size = d3.scaleLinear()
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
                       .range([width/80, width/20]);  // circle will be between 7 and 55 px wide, need to play with this
@@ -101,17 +166,24 @@ function applyData() {
               .style("fill", "#69b3a2")
               .style("fill-opacity", 0.3)
               .attr("stroke", "#69a2b2")
-              .style("stroke-width", 2);
+              .style("stroke-width", 2)
+              .on("mouseover", createTooltip)
+              .on("mousemove", updateTooltip)
+              .on("mouseout", removeTooltip);
+
 
           gEnter.append('text')
               .attr('text-anchor', "middle")
               .attr("font-size", function(d) {
                   return Math.round(size(d.Count)/3) + 'px';
               })
-              .text(d => d["Child's First Name"]);
+              .text(d => d["Child's First Name"])
+              .on("mouseover", createTooltip)
+              .on("mousemove", updateTooltip)
+              .on("mouseout", removeTooltip);
 
           g.select("circle")
-            .attr("r", function(d) { console.log(d.Count, size(d.Count)); return size(d.Count)});
+            .attr("r", d=>size(d.Count));
 
           g.select('text')
               .attr("x", width / 2)

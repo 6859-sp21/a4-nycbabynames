@@ -72,3 +72,32 @@ h1 {
   width: 80%;
   margin-right: 20px;
 }
+
+.tooltp {
+  color: black;
+  background-color: #eaeaea;
+  position: absolute;
+  padding: 20px;
+  padding-top: 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.tooltp>p {
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.25em;
+  margin-bottom: 8px;
+}
+
+.tooltp>ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tooltp>ul>li>img {
+  border-style: none;
+  margin-left: 2px;
+  vertical-align: baseline;
+}
