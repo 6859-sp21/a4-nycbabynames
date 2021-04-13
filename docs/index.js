@@ -39,6 +39,70 @@ document.getElementById("year-filter").addEventListener("input", e=>{
   applyData();
 });
 
+document.getElementById("search-button").addEventListener("click", e=>{
+  search_name = document.getElementById("search-box").value
+  name_element = document.getElementById("search-name")
+  name_element.innerHTML = search_name
+  name_element.style.display = 'flex'
+  name_element.style.fontSize = '5rem'
+  name_element.style.justifyContent = 'center'
+  applySearchView(search_name);
+});
+
+function applySearchView(search_name) {
+  svg.selectAll("circle").remove(); // remove bubble view
+  svg.selectAll("text").remove() // the text from the bubbles
+  svg.attr("text-anchor", null);
+  d3.csv("baby_names.csv", convert_to_ints)
+       .then(data => {
+          let year = document.getElementById("year-filter").value
+          data = data.filter(d=>d["Year of Birth"] == year);
+          name_results = data.filter(d=>d["Child's First Name"] == search_name);
+          if (name_results.length == 0) {
+            // TODO: add a no results found page
+            console.log("no results found")
+          }
+          else {
+            var i = 0
+
+            for (item in name_results) {
+              name_results[i].key = i
+              i = i + 1
+            }
+            
+            yScale = d3.scaleBand()
+                .domain(name_results.map(d => d.key))
+                .range([60, 0]) // px
+
+            xScale = d3.scaleLinear()
+                .domain([0, d3.max(name_results, d => d.Count)])
+                .range([0, 100]) // px
+
+            
+            svg.selectAll('rect')
+                .data(name_results)
+                .join('rect')
+                  .attr('x', width/2)
+                  .attr('y', d => {return yScale(d.key) + height/4})        // Use the "yScale" here instead of manually positioning bars
+                  .attr('width', d => {return xScale(d.Count)})
+                  .attr('height', yScale.bandwidth())   // Band scales divide a pixel range into equally-sized bands
+                  .style('fill','black')
+                  .style('stroke', 'white')
+              
+            svg.selectAll('text')
+                .data(name_results)
+                .join('text')
+                  .attr('x', d => xScale(d.Count))
+                  .attr('y', d => yScale(d.key))   // Use the "yScale" here instead of manually positioning labels
+                  .attr('dx', 20)
+                  .attr('dy', '1em')
+                  .attr('fill', 'black')
+                  .style('font-size', 'small')
+                  // .text(d => d.Count)
+          }
+       });
+}
+
 var simulation = d3.forceSimulation()
                     .force("center", d3.forceCenter().x(width / 2).y(height / 2)) // Attraction to the center of the svg area
                     .force("charge", d3.forceManyBody().strength(1)) // Nodes are attracted one each other of value is > 0

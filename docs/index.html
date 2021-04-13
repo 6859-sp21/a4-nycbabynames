@@ -7,6 +7,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="index.css">
 
     <title>Baby Names Vis</title>
@@ -44,6 +45,13 @@
               <input id="year-filter" type="range" class="form-range" value="2011" min="2011" max="2017" step="1" v-model="year">
               <text id="year-selected">2011</text>
             </div>
+            <div id="filter-search">
+              <h4> Search for a name</h4>
+              <div class="search-section">
+                <input id="search-box" type="text" placeholder="type a name">
+                <button id="search-button" type="submit"><i class="fa fa-search"></i></button>
+              </div>
+            </div>
           </div>
         </div>
         <div class = "sidebar-footnote">
@@ -53,6 +61,8 @@
       <div class = "main">
         <!-- <div class = "main-content"> -->
           <div id = "svgcontainer">
+            <div id="search-name">
+            </div>
           </div>
         <!-- </div> -->
       </div>
