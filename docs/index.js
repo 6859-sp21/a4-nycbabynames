@@ -4,6 +4,14 @@ let dataName = "male_names.csv";
 var width = container.offsetWidth;
 var height = container.offsetHeight;
 
+let colors={
+  'ALL': "#20686c",
+  "HISPANIC": "#009236",
+  "WHITE NON HISPANIC": "#6bc4a6",
+  "ASIAN AND PACIFIC ISLANDER": "#fe982a",
+  "BLACK NON HISPANIC": "#bc4f07"
+};
+
 var svg = d3.select("#svgcontainer")
             .append("svg")
             .attr("width", '100%')
@@ -198,7 +206,7 @@ function filter(data, year, ethnicities) {
     yearData.forEach(function(row) {
       var index = names.indexOf(row["Child's First Name"]);
       if (index == -1) {
-        row.Ethnicity = 'All'
+        row.Ethnicity = 'ALL'
         names.push(row["Child's First Name"]);
         combinedData.push(row);
       }
@@ -248,9 +256,9 @@ function applyData() {
           gEnter.append("circle")
               .attr("class", function(d) {return d["Child's First Name"]})
               .attr("r", function(d){ return size(d.Count)})
-              .style("fill", "#69b3a2")
+              .style("fill", function(d) {return colors[d.Ethnicity]})
               .style("fill-opacity", 0.3)
-              .attr("stroke", "#69a2b2")
+              .attr("stroke", function(d) {return colors[d.Ethnicity]})
               .style("stroke-width", 2)
               .on("mouseover", createTooltip)
               .on("mousemove", updateTooltip)
@@ -268,7 +276,9 @@ function applyData() {
               .on("mouseout", removeTooltip);
 
           g.select("circle")
-            .attr("r", d=>size(d.Count));
+            .attr("r", d=>size(d.Count))
+            .style("fill", function(d) {return colors[d.Ethnicity]})
+            .attr("stroke", function(d) {return colors[d.Ethnicity]});
 
           g.select('text')
               .attr("x", width / 2)
