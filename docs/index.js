@@ -22,6 +22,34 @@ var svg = d3.select("#svgcontainer")
 const view = svg.append("g")
       .attr("cursor", "grab");
 
+const label = svg.append("g");
+
+label.append("text")
+  .attr("class", "year")
+  .text("2011")
+  .style("font-size", "4rem")
+  .attr("text-anchor", "start")
+  .attr("x", "2rem")
+  .attr("y", "5rem")
+  .style("fill-opacity", 0.4);
+
+label.append("text")
+  .attr("class", "gender")
+  .text("Male")
+  .style("font-size", "2rem")
+  .attr("text-anchor", "start")
+  .attr("x", "2.2rem")
+  .attr("y", "7.5rem")
+  .style("fill-opacity", 0.7);
+
+label.append("text")
+  .attr("class", "ethnicity")
+  .style("font-size", "1.3rem")
+  .attr("text-anchor", "start")
+  .attr("x", "2.2rem")
+  .attr("y", "9.5rem")
+  .style("fill-opacity", 0.7);
+
 var zoom = d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([1, 8])
@@ -54,20 +82,30 @@ function convert_to_ints(d){
 function changeGender(genderInput) {
   if (genderInput==='male') {
     dataName = "male_names.csv";
+    label.select("text.gender").text("Male");
   } else {
     dataName = "female_names.csv";
+    label.select("text.gender").text("Female");
   }
   applyData();
 }
 
 function filterEthnicity() {
   applyData();
+  let ethnicities = document.getElementById('ethnicity').value;
+  if (ethnicities == "ALL") {
+    label.select("text.ethnicity").text("");
+  } else {
+    label.select("text.ethnicity").text(ethnicities);
+  }
   resetZoom();
 }
 
 document.getElementById("year-filter").addEventListener("input", e=>{
   let year = e.target.value;
   document.getElementById("year-selected").innerHTML = year;
+  label.select("text.year").text(year);
+
   applyData();
 });
 
