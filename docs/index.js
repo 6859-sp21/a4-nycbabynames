@@ -1,6 +1,7 @@
 let container = document.querySelector('#svgcontainer');
 let dataName = "male_names.csv";
 let searchOn = false;
+var natData = [];
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -156,7 +157,6 @@ function callSearchView() {
   searchOn = true;
   search_name = document.getElementById("search-box").value
   search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
-  console.log(search_name)
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
@@ -311,7 +311,6 @@ function applySearchView(search_name) {
                   nat_name_results = data1.filter(d=>d["name"] == search_name);
                   if (nat_name_results.length == 0) {
                     not_in_nat = true;
-                    console.log("not found in national data")
                   }
                   else {
                     current_rank = nat_name_results[0].rank
@@ -325,7 +324,6 @@ function applySearchView(search_name) {
                     not_in_nat2 = true;
                     last_rank = ">1000"
                     change = "had an unknown change"
-                    console.log("not found in national data")
                   }
                   else {
                     last_rank = nat_name_results2[0].rank
@@ -382,16 +380,13 @@ function rank(i) {
   return i > 0 ? "+"+i : i;
 }
 
-
-d3.csv("all_national_data_1990_2019.csv")
-  .then(d=>{console.log('test');natData=d})
 function createTooltip(e, d) {
   tooltip.style('display', 'inherit');
   tooltip.append('p').text(d["Child's First Name"]);
   let ul = tooltip.append('ul');
   ul.append('li').text('Babies: ' + d.Count);
-  if (d.natRank)
-    ul.append('li').text('National Rank: ' + d.natRank);
+  if (d['nat-rank'])
+    ul.append('li').text('National Rank: ' + d['nat-rank']);
   ul.append('li').text('Rank Within Selection: ' + (d.selRank));
   if (d.delta) {
     let delta = d.delta-d.selRank;
