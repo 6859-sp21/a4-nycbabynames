@@ -1,6 +1,7 @@
 let container = document.querySelector('#svgcontainer');
 let dataName = "male_names.csv";
 let searchOn = false;
+var natData = [];
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -324,7 +325,6 @@ function applySearchView(search_name) {
                   nat_name_results = data1.filter(d=>d["name"] == search_name);
                   if (nat_name_results.length == 0) {
                     not_in_nat = true;
-                    console.log("not found in national data")
                   }
                   else {
                     current_rank = nat_name_results[0].rank
@@ -338,7 +338,6 @@ function applySearchView(search_name) {
                     not_in_nat2 = true;
                     last_rank = ">1000"
                     change = "had an unknown change"
-                    console.log("not found in national data")
                   }
                   else {
                     last_rank = nat_name_results2[0].rank
@@ -400,8 +399,9 @@ function createTooltip(e, d) {
   tooltip.append('p').text(d["Child's First Name"]);
   let ul = tooltip.append('ul');
   ul.append('li').text('Babies: ' + d.Count);
+  if (d['nat-rank'])
+    ul.append('li').text('National Rank: ' + d['nat-rank']);
   ul.append('li').text('Rank Within Selection: ' + (d.selRank));
-  ul.append('li').text('National Rank: ' + d.natRank);
   if (d.delta) {
     let delta = d.delta-d.selRank;
     let li = ul.append('li');
@@ -412,7 +412,6 @@ function createTooltip(e, d) {
         .attr('src', imgSrc)
         .attr('width', '12px')
     }
-
   }
   updateTooltip(e,d);
 }
