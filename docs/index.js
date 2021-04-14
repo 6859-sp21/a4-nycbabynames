@@ -24,8 +24,21 @@ var svg = d3.select("#svgcontainer")
             .attr("text-anchor", "middle")
             .attr("viewBox", [0,0,width, height]);
 
-const view = svg.append("g")
-      .attr("cursor", "grab");
+function addView() {
+  svg.append("g")
+    .attr("class", "view")
+    .attr("cursor", "grab");
+}
+
+function fillReset() {
+  d3.selectAll("g.reset").select("rect").style("fill", "#dc3545").style("cursor", "pointer");
+  d3.selectAll("g.reset").select("text").style("fill", "white").style("cursor", "pointer");
+}
+
+function unFillReset() {
+  d3.selectAll("g.reset").select("rect").style("fill", "none");
+  d3.selectAll("g.reset").select("text").style("fill", "#dc3545");
+}
 
 function addResetButton() {
   const reset = svg.append("g").attr("class", "reset");
@@ -34,12 +47,13 @@ function addResetButton() {
     .attr('y', 6*height/7)
     .attr('width', 100)
     .attr('height', 30)
-    .style('fill', 	"#FF6347")
-    .style('stroke', "#FF6347")
+    .attr("rx", 3)
+    .attr("ry", 3)
+    .style('fill', 	"none")
+    .style('stroke', "#dc3545")
     .style("fill-opacity", 0.8)
-    .on("mouseover", function(d) {
-      d3.select(this).style("cursor", "pointer");
-    })
+    .on("mouseover", fillReset)
+    .on("mouseout", unFillReset)
     .on("click", function(d) {
       resetZoom();
     });
@@ -50,17 +64,17 @@ function addResetButton() {
     .style('text-anchor', 'middle')
     .attr('dx', 50)
     .attr('dy', 20)
+    .style("fill", "#dc3545")
     .text("Reset Zoom")
-    .on("mouseover", function(d) {
-      d3.select(this).style("cursor", "pointer");
-    })
+    .on("mouseover", fillReset)
+    .on("mouseout", unFillReset)
     .on("click", function(d) {
       resetZoom();
     });
 }
 
 function addLabel() {
-  const label = view.append("g");
+  const label = svg.selectAll("g.view").append("g");
   let year = document.getElementById("year-filter").value;
   let ethnicities = document.getElementById('ethnicity').value;
   if (ethnicities == "ALL") {
@@ -110,8 +124,8 @@ let tooltip = d3.select("#svgcontainer").append('div')
                   .attr('class', 'tooltp')
 
 function zoomed({transform}) {
-    view.attr("transform", transform);
-    if (!zoomedIn) {
+    svg.selectAll("g.view").attr("transform", transform);
+    if (!zoomedIn && !searchOn) {
       addResetButton();
       zoomedIn = true;
     }
@@ -138,10 +152,10 @@ function convert_to_ints(d){
 function changeGender(genderInput) {
   if (genderInput==='male') {
     dataName = "male_names.csv";
-    view.select("text.gender").text("Male");
+    svg.select("text.gender").text("Male");
   } else {
     dataName = "female_names.csv";
-    view.select("text.gender").text("Female");
+    svg.select("text.gender").text("Female");
   }
   if (searchOn) {
     applySearchView(current_search_name);
@@ -156,9 +170,9 @@ function changeGender(genderInput) {
 function filterEthnicity() {
   let ethnicities = document.getElementById('ethnicity').value;
   if (ethnicities == "ALL") {
-    view.select("text.ethnicity").text("");
+    svg.select("text.ethnicity").text("");
   } else {
-    view.select("text.ethnicity").text(ethnicities);
+    svg.select("text.ethnicity").text(ethnicities);
   }
 
   if (!searchOn) {
@@ -169,7 +183,7 @@ function filterEthnicity() {
 document.getElementById("year-filter").addEventListener("input", e=>{
   let year = e.target.value;
   document.getElementById("year-selected").innerHTML = year;
-  view.select("text.year").text(year);
+  svg.select("text.year").text(year);
 
   if (searchOn) {
     applySearchView(current_search_name);
@@ -202,6 +216,7 @@ document.getElementById("cancel").addEventListener("click", e=> {
   svg.selectAll("path").remove() // remove previous chart axis
   svg.selectAll("g.yAxis").remove() // remove line from axis
   svg.selectAll("g.tick").remove() // remove ticks from axis
+  addView();
   addLabel();
   applyData();
   newEnter = true;
@@ -230,6 +245,7 @@ function applySearchView(search_name) {
   svg.selectAll("g.yAxis").remove()
   svg.selectAll("g.tick").remove()
   svg.selectAll("g.bubble").remove() // remove all gs as well
+  svg.selectAll("g.view").remove()
   svg.attr("text-anchor", null);
   current_search_name = search_name
   d3.csv("baby_names.csv", convert_to_ints)
@@ -304,7 +320,7 @@ function applySearchView(search_name) {
                 .domain(name_results.map(d => d.key))
                 .range([height/3, 0]) // px
                 .padding(0.2)
-            
+
             xScale = d3.scaleLinear()
                 .domain([0, d3.max(name_all_years, d => d.Count)])
                 .range([0, width/2]) // px
@@ -424,10 +440,10 @@ var simulation = d3.forceSimulation()
                     .force('x', d3.forceX().strength(.001).x(width/2))
                     .force('y', d3.forceY().strength(.001).y(height/2))
                     .on("tick", function(d){
-                        view.selectAll("circle")
+                        svg.selectAll("circle")
                           .attr("cx", function(d){ return d.x; })
                           .attr("cy", function(d){ return d.y; })
-                        view.selectAll("text.circle-name")
+                        svg.selectAll("text.circle-name")
                           .attr("x", function(d){ return d.x; })
                           .attr("y", function(d){ return d.y*1.005; })
                     });
@@ -532,7 +548,7 @@ function applyData() {
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
                       .range([width/80, width/20]);
 
-          var g = view.selectAll("g.bubble").data(topData, d=>d["Child's First Name"]);
+          var g = svg.selectAll("g.view").selectAll("g.bubble").data(topData, d=>d["Child's First Name"]);
 
           if (!newEnter) {
             let index = 0;
@@ -633,5 +649,6 @@ function applyData() {
           newEnter = false;
     });
   }
+addView();
 addLabel();
 applyData();

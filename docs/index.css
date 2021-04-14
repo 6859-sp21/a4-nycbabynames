@@ -10,6 +10,10 @@ h1 {
     display: none;
 }
 
+#reset {
+    display: none;
+}
+
 .filter-button {
     font-size: 1.2rem;
     padding: 5px;
