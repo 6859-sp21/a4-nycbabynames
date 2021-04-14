@@ -131,18 +131,13 @@ document.getElementById("year-filter").addEventListener("input", e=>{
 });
 
 document.getElementById("search-button").addEventListener("click", e=>{
-  searchOn = true;
-  search_name = document.getElementById("search-box").value
-  name_element = document.getElementById("search-name")
-  name_element.innerHTML = search_name
-  name_element.style.display = 'flex'
-  name_element.style.fontSize = '5rem'
-  name_element.style.justifyContent = 'center'
-  cancel_button = document.getElementById("cancel")
-  cancel_button.style.display = 'flex'
-  cancel_button.style.marginTop = '10px'
-  cancel_button.style.marginRight = '10px'
-  applySearchView(search_name);
+    callSearchView()
+});
+
+document.getElementById("search-box").addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') {
+    callSearchView()
+  }
 });
 
 document.getElementById("cancel").addEventListener("click", e=> {
@@ -156,6 +151,22 @@ document.getElementById("cancel").addEventListener("click", e=> {
   svg.selectAll("g.tick").remove() // remove ticks from axis
   applyData();
 })
+
+function callSearchView() {
+  searchOn = true;
+  search_name = document.getElementById("search-box").value
+  name_element = document.getElementById("search-name")
+  name_element.innerHTML = search_name
+  name_element.style.display = 'flex'
+  name_element.style.fontSize = '5rem'
+  name_element.style.justifyContent = 'center'
+  cancel_button = document.getElementById("cancel")
+  cancel_button.style.display = 'flex'
+  cancel_button.style.marginTop = '10px'
+  cancel_button.style.marginRight = '10px'
+  applySearchView(search_name);
+}
+
 
 function applySearchView(search_name) {
   svg.selectAll("circle").remove(); // remove bubble view
@@ -181,9 +192,9 @@ function applySearchView(search_name) {
 
           name_results = data.filter(d=>d["Child's First Name"] == search_name);
           if (name_results.length == 0) {
-            var search_label = svg.append("g");
+            var no_results_label = svg.append("g");
 
-              search_label.append("text")
+              no_results_label.append("text")
                 .attr("class", "line1")
                 .text("Sorry, there are no results")
                 .style("font-size", "3rem")
@@ -192,7 +203,7 @@ function applySearchView(search_name) {
                 .attr("y", "5rem")
                 .style("fill-opacity", 0.7);
 
-              search_label.append("text")
+              no_results_label.append("text")
                 .attr("class", "line2")
                 .text("for " + gender.toLowerCase() + " " + search_name + " in " + year )
                 .style("font-size", "3rem")
@@ -201,7 +212,7 @@ function applySearchView(search_name) {
                 .attr("y", "8rem")
                 .style("fill-opacity", 0.7);
 
-              search_label.append("text")
+              no_results_label.append("text")
                 .attr("class", "line3")
                 .text("Please try again.")
                 .style("font-size", "3rem")
@@ -215,7 +226,19 @@ function applySearchView(search_name) {
             var i = 0
 
             for (item in name_results) {
-              name_results[i].key = i // ethnicities are not all in the same place the whole time, i think if i sort then it should be fine?
+              name_results[i].key = i 
+              if (name_results[i].Ethnicity == "HISPANIC") {
+                name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among Hispanic " + gender.toLowerCase() + " babies in " + year + "."
+              }
+              if (name_results[i].Ethnicity == "BLACK NON HISPANIC") {
+                name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among Black " + gender.toLowerCase() + " babies in " + year + "."
+              }
+              if (name_results[i].Ethnicity == "WHITE NON HISPANIC") {
+                name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among White " + gender.toLowerCase() + " babies in " + year + "."
+              }
+              if (name_results[i].Ethnicity == "ASIAN AND PACIFIC ISLANDER") {
+                name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among Asian/Pacific Islander " + gender.toLowerCase() + " babies in " + year + "."
+              }
               i = i + 1
             }
 
@@ -259,7 +282,41 @@ function applySearchView(search_name) {
             
             search.append("g")
                   .call(yAxis);
-          }
+
+            for (item in name_results) {
+              search.append("text")                
+              .attr("class", "rank")
+              .text(name_results[item].rankText)
+              .style("font-size", "1rem")
+              .attr("text-anchor", "start")
+              .attr("x", width/6)
+              .attr("y", height/2 + 30*item)
+              .style("fill-opacity", 0.7);
+            }
+
+            // placeholder for national data
+
+            // var temp = "5"
+            // search.append("text")                
+            //   .attr("class", "nat_rank")
+            //   .text(search_name + " was the #" + temp + " ranked name nationally for " + gender.toLowerCase() +" babies in " + year)
+            //   .style("font-size", "1rem")
+            //   .attr("text-anchor", "start")
+            //   .attr("x", width/6)
+            //   .attr("y", height/2 + 30*name_results.length + 30)
+            //   .style("fill-opacity", 0.7);
+
+            // var temp2 = "increased"
+            // var temp3 = "8"
+            // search.append("text")                
+            //   .attr("class", "nat_rank")
+            //   .text(search_name + "'s rank " + temp2 + " from #" + temp3 + " in " + (parseInt(year, 10) - 1).toString() + ".")
+            //   .style("font-size", "1rem")
+            //   .attr("text-anchor", "start")
+            //   .attr("x", width/6)
+            //   .attr("y", height/2 + 30*name_results.length + 60)
+            //   .style("fill-opacity", 0.7);
+        }
        });
 }
 
@@ -443,4 +500,4 @@ function applyData() {
     });
   }
 
-  applyData();
+applyData();
