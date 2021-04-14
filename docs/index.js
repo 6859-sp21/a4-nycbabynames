@@ -25,9 +25,17 @@ var svg = d3.select("#svgcontainer")
             .attr("viewBox", [0,0,width, height]);
 
 function addView() {
-  svg.append("g")
+  const view = svg.append("g")
     .attr("class", "view")
-    .attr("cursor", "grab");
+    .style("cursor", "grab");
+  view.append("rect")
+    .attr("fill", "none")
+    .attr("x", 0)
+    .attr("y",0)
+    .attr("width", '100%')
+    .attr("height", '100%')
+    .attr("pointer-events", "all")
+    .on("mouseover", function() {console.log("here"); d3.select(this).style("cursor", "grab")})
 }
 
 function fillReset() {
@@ -88,28 +96,28 @@ function addLabel() {
   label.append("text")
     .attr("class", "year")
     .text(year)
-    .style("font-size", "4rem")
+    .style("font-size", "3rem")
     .attr("text-anchor", "start")
     .attr("x", "2rem")
-    .attr("y", "5rem")
+    .attr("y", "4rem")
     .style("fill-opacity", 0.4);
 
   label.append("text")
     .attr("class", "gender")
     .text(gender)
-    .style("font-size", "2rem")
+    .style("font-size", "1.5rem")
     .attr("text-anchor", "start")
     .attr("x", "2.2rem")
-    .attr("y", "7.5rem")
+    .attr("y", "6rem")
     .style("fill-opacity", 0.7);
 
   label.append("text")
     .attr("class", "ethnicity")
     .text(ethnicities)
-    .style("font-size", "1.3rem")
+    .style("font-size", "1.2rem")
     .attr("text-anchor", "start")
     .attr("x", "2.2rem")
-    .attr("y", "9.5rem")
+    .attr("y", "7.8rem")
     .style("fill-opacity", 0.7);
 }
 
@@ -230,7 +238,7 @@ function callSearchView(search_name, year) {
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
-  name_element.style.fontSize = '5rem'
+  name_element.style.fontSize = '3rem'
   name_element.style.justifyContent = 'center'
   cancel_button = document.getElementById("cancel")
   cancel_button.style.display = 'flex'
@@ -280,27 +288,30 @@ function applySearchView(search_name, search_year) {
               no_results_label.append("text")
                 .attr("class", "line1")
                 .text("Sorry, there are no results")
-                .style("font-size", "3rem")
+                .style("font-size", "2rem")
                 .attr("text-anchor", "start")
-                .attr("x", "5rem")
+                .attr("x", width/2)
+                .attr("dx", "-10rem")
                 .attr("y", "5rem")
                 .style("fill-opacity", 0.7);
 
               no_results_label.append("text")
                 .attr("class", "line2")
                 .text("for " + gender.toLowerCase() + " " + search_name + " in " + year )
-                .style("font-size", "3rem")
+                .style("font-size", "2rem")
                 .attr("text-anchor", "start")
-                .attr("x", "5rem")
+                .attr("x", width/2)
+                .attr("dx", "-10rem")
                 .attr("y", "8rem")
                 .style("fill-opacity", 0.7);
 
               no_results_label.append("text")
                 .attr("class", "line3")
                 .text("Please try again.")
-                .style("font-size", "3rem")
+                .style("font-size", "2rem")
                 .attr("text-anchor", "start")
-                .attr("x", "5rem")
+                .attr("x", width/2)
+                .attr("dx", "-10rem")
                 .attr("y", "11rem")
                 .style("fill-opacity", 0.7);
 
@@ -340,7 +351,7 @@ function applySearchView(search_name, search_year) {
                 .data(name_results)
                 .join('rect')
                   .attr('x', width/4)
-                  .attr('y', d => {return yScale(d.key) + height/8})        // Use the "yScale" here instead of manually positioning bars
+                  .attr('y', d => {return yScale(d.key) + height/10})        // Use the "yScale" here instead of manually positioning bars
                   .attr('width', d => {return xScale(d.Count)})
                   .attr('height', yScale.bandwidth())  // because range is 0 to h/3, each band is h/12 in height // Band scales divide a pixel range into equally-sized bands
                   .style('fill', function(d) {return colors[d.Ethnicity]})
@@ -351,7 +362,7 @@ function applySearchView(search_name, search_year) {
                 .data(name_results)
                 .join('text')
                   .attr('x', d => width/4 + xScale(d.Count))
-                  .attr('y', d => yScale(d.key) + height/8 )   // Use the "yScale" here instead of manually positioning labels
+                  .attr('y', d => yScale(d.key) + height/10 )   // Use the "yScale" here instead of manually positioning labels
                   .attr('dx', 10)
                   .attr('dy', yScale.bandwidth()/2 + 5) // unsure what the conversion to rem is here
                   .attr('fill', '#404040')
@@ -359,7 +370,7 @@ function applySearchView(search_name, search_year) {
                   .text(d => d.Count)
 
             yAxis = g => g
-                .attr("transform", `translate(${width/4},${height/8})`)
+                .attr("transform", `translate(${width/4},${height/10})`)
                 .attr("class", "yAxis")
                 .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
 
@@ -582,8 +593,8 @@ function applyData() {
               .transition()
               .duration(3000)
               .attr("transform", function(d) {
-                let deltax = Math.round(3*width/4 + Math.floor(index/10)*maxSize + 10 - d.x);
-                let deltay = Math.round(height/6 + index%10*maxSize + 10 - d.y);
+                let deltax = Math.round(5*width/6 + Math.floor(index/10)*maxSize + 10 - d.x);
+                let deltay = Math.round(height/6 + (index%10)*maxSize + 10 - d.y);
                 index++;
                 return "translate("+deltax + ","+deltay+")";
               })
