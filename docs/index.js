@@ -294,28 +294,69 @@ function applySearchView(search_name) {
               .style("fill-opacity", 0.7);
             }
 
-            // placeholder for national data
+            d3.csv("all_national_data_1990_2019.csv")
+                .then(data => { 
+                  if (gender == "MALE") {
+                    var gen = "M";
+                  }
+                  else {
+                    var gen = "F";
+                  }
+                  
+                  data1 = data.filter(d=>d["year"] == year);
+                  data1 = data1.filter(d=>d["gender"] == gen);
 
-            // var temp = "5"
-            // search.append("text")                
-            //   .attr("class", "nat_rank")
-            //   .text(search_name + " was the #" + temp + " ranked name nationally for " + gender.toLowerCase() +" babies in " + year)
-            //   .style("font-size", "1rem")
-            //   .attr("text-anchor", "start")
-            //   .attr("x", width/6)
-            //   .attr("y", height/2 + 30*name_results.length + 30)
-            //   .style("fill-opacity", 0.7);
+                  nat_name_results = data1.filter(d=>d["name"] == search_name);
+                  if (nat_name_results.length == 0) {
+                    not_in_nat = true;
+                    console.log("not found in national data")
+                  }
+                  else {
+                    current_rank = nat_name_results[0].rank
+                  }
 
-            // var temp2 = "increased"
-            // var temp3 = "8"
-            // search.append("text")                
-            //   .attr("class", "nat_rank")
-            //   .text(search_name + "'s rank " + temp2 + " from #" + temp3 + " in " + (parseInt(year, 10) - 1).toString() + ".")
-            //   .style("font-size", "1rem")
-            //   .attr("text-anchor", "start")
-            //   .attr("x", width/6)
-            //   .attr("y", height/2 + 30*name_results.length + 60)
-            //   .style("fill-opacity", 0.7);
+                  data2 = data.filter(d=>d["year"] == (parseInt(year, 10) - 1).toString());
+                  data2 = data2.filter(d=>d["gender"] == gen);
+
+                  nat_name_results2 = data2.filter(d=>d["name"] == search_name);
+                  if (nat_name_results2.length == 0) {
+                    not_in_nat2 = true;
+                    last_rank = ">1000"
+                    change = "had an unknown change"
+                    console.log("not found in national data")
+                  }
+                  else {
+                    last_rank = nat_name_results2[0].rank
+                    if (parseInt(last_rank, 10) > parseInt(current_rank, 10)) {
+                      change = "increased"
+                    }
+                    if (parseInt(last_rank, 10) < parseInt(current_rank, 10)) {
+                      change = "decreased"
+                    }
+                    if (parseInt(last_rank, 10) == parseInt(current_rank, 10)) {
+                      change = "stayed the same"
+                    }
+                  }
+
+                  search.append("text")                
+                  .attr("class", "nat_rank")
+                  .text(search_name + " was the #" + current_rank + " ranked name nationally for " + gender.toLowerCase() +" babies in " + year)
+                  .style("font-size", "1rem")
+                  .attr("text-anchor", "start")
+                  .attr("x", width/6)
+                  .attr("y", height/2 + 30*name_results.length + 30)
+                  .style("fill-opacity", 0.7);
+    
+                  search.append("text")                
+                    .attr("class", "nat_rank")
+                    .text(search_name + "'s rank " + change + " from #" + last_rank + " in " + (parseInt(year, 10) - 1).toString() + ".")
+                    .style("font-size", "1rem")
+                    .attr("text-anchor", "start")
+                    .attr("x", width/6)
+                    .attr("y", height/2 + 30*name_results.length + 60)
+                    .style("fill-opacity", 0.7);
+              });
+
         }
        });
 }
