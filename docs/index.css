@@ -79,6 +79,7 @@ h1 {
 
 #svgcontainer {
   height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar-content {
