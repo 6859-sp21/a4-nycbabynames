@@ -155,6 +155,8 @@ document.getElementById("cancel").addEventListener("click", e=> {
 function callSearchView() {
   searchOn = true;
   search_name = document.getElementById("search-box").value
+  search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
+  console.log(search_name)
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
@@ -294,7 +296,7 @@ function applySearchView(search_name) {
               .style("fill-opacity", 0.7);
             }
 
-            d3.csv("all_national_data_1990_2019.csv")
+            d3.csv("all_national_data_2010_2017.csv")
                 .then(data => { 
                   if (gender == "MALE") {
                     var gen = "M";
