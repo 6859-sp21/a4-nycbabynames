@@ -2,6 +2,7 @@ let container = document.querySelector('#svgcontainer');
 let dataName = "male_names.csv";
 let searchOn = false;
 var natData = [];
+let newEnter = true;
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -106,9 +107,10 @@ function changeGender(genderInput) {
     applySearchView(search_name)
   }
   else {
+    newEnter=true;
     applyData();
+    resetZoom();
   }
-  resetZoom();
 }
 
 function filterEthnicity() {
@@ -126,8 +128,6 @@ function filterEthnicity() {
   else {
     applyData();
   }
-
-  resetZoom();
 }
 
 document.getElementById("year-filter").addEventListener("input", e=>{
@@ -165,6 +165,7 @@ document.getElementById("cancel").addEventListener("click", e=> {
   svg.selectAll("g.tick").remove() // remove ticks from axis
   addLabel();
   applyData();
+  newEnter = true;
 })
 
 function callSearchView() {
@@ -490,19 +491,53 @@ function applyData() {
                       .range([width/80, width/20]);
 
           var g = view.selectAll("g.bubble").data(topData, d=>d["Child's First Name"]);
-          var gEnter = g.enter().append("g").attr("class", "bubble");
 
-          g.exit().remove();
+          if (!newEnter) {
+            let index = 0;
+            let maxSize = 0;
+            let maxRadius = 0;
+            g.exit().selectAll("circle").each(function(d) {
+              if (d.Count > maxSize) {
+                maxSize = d.Count;
+                maxRadius = this.r;
+              }
+            });
+            if (maxRadius.baseVal) {
+              maxSize = maxRadius.baseVal.value*2;
+            }
+            g.exit()
+              .transition()
+              .duration(3000)
+              .attr("transform", function(d) {
+                let deltax = Math.round(3*width/4 + Math.floor(index/10)*maxSize + 10 - d.x);
+                let deltay = Math.round(height/6 + index%10*maxSize + 10 - d.y);
+                index++;
+                return "translate("+deltax + ","+deltay+")";
+              })
+              .remove();
+          } else {
+            g.exit().remove();
+          }
+
+          var gEnter = g.enter().append("g").attr("class", "bubble");
           gEnter.append("circle")
               .attr("class", function(d) {return d["Child's First Name"]})
               .attr("r", function(d){ return size(d.Count)})
-              .style("fill", function(d) {return colors[d.Ethnicity]})
+              .style("fill", function(d) {if (newEnter) {return colors[d.Ethnicity]; } else {return "#00FF00";}})
               .style("fill-opacity", 0.3)
-              .attr("stroke", function(d) {return colors[d.Ethnicity]})
+              .attr("stroke", function(d) {if (newEnter) {return colors[d.Ethnicity]; } else {return "#00DF00";}})
               .style("stroke-width", 2)
               .on("mouseover", createTooltip)
               .on("mousemove", updateTooltip)
               .on("mouseout", removeTooltip);
+
+          if (!newEnter) {
+            gEnter.selectAll("circle")
+              .transition()
+              .duration(3000)
+              .style("fill", function(d) {return colors[d.Ethnicity]})
+              .attr("stroke", function(d) {return colors[d.Ethnicity]});
+          }
 
           gEnter.append('text')
               .attr("class", "circle-name")
@@ -552,6 +587,8 @@ function applyData() {
           simulation.nodes(persistent_data)
             .force("collide", d3.forceCollide().strength(.2).radius(function(d){ return (size(d.Count)+3) }).iterations(5))
             .alpha(1).restart();
+
+          newEnter = false;
     });
   }
 addLabel();
