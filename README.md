@@ -15,7 +15,7 @@ A rationale for your design decisions. How did you choose your particular visual
 
 **Tooltips:**
 
-**Search View:**
+**Search View:** Naturally, we felt that people's first inclination is always "what's in it for them?". People always want to be able to relate to the data, and as such, we gave users the ability to search their name in the whole NYC dataset (note that in the regular visualization view, we only show the top 100 names). 
 
 ### Development Process
 
