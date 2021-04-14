@@ -59,7 +59,7 @@ Tim
   - Implemented tooltip & augmented NYC dataset with SSA national rank
 
 Ivana
-  - Designed page structure and vizualization bubbles
+  - Designed page structure and visualization bubbles
   - Prepped SSA dataset
   - Implemented name searching and the visualization displayed.
 
