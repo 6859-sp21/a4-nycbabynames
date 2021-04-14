@@ -3,6 +3,7 @@ let dataName = "male_names.csv";
 let searchOn = false;
 var natData = [];
 let newEnter = true;
+let zoomedIn = false;
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -24,6 +25,38 @@ var svg = d3.select("#svgcontainer")
 
 const view = svg.append("g")
       .attr("cursor", "grab");
+
+function addResetButton() {
+  const reset = svg.append("g").attr("class", "reset");
+  reset.append("rect")
+    .attr('x', 5*width/6)
+    .attr('y', 6*height/7)
+    .attr('width', 100)
+    .attr('height', 30)
+    .style('fill', 	"#FF6347")
+    .style('stroke', "#FF6347")
+    .style("fill-opacity", 0.8)
+    .on("mouseover", function(d) {
+      d3.select(this).style("cursor", "pointer");
+    })
+    .on("click", function(d) {
+      resetZoom();
+    });
+
+  reset.append("text")
+    .attr('x', 5*width/6)
+    .attr('y', 6*height/7)
+    .style('text-anchor', 'middle')
+    .attr('dx', 50)
+    .attr('dy', 20)
+    .text("Reset Zoom")
+    .on("mouseover", function(d) {
+      d3.select(this).style("cursor", "pointer");
+    })
+    .on("click", function(d) {
+      resetZoom();
+    });
+}
 
 function addLabel() {
   const label = view.append("g");
@@ -77,6 +110,10 @@ let tooltip = d3.select("#svgcontainer").append('div')
 
 function zoomed({transform}) {
     view.attr("transform", transform);
+    if (!zoomedIn) {
+      addResetButton();
+      zoomedIn = true;
+    }
 }
 
 function resetZoom() {
@@ -84,7 +121,10 @@ function resetZoom() {
       zoom.transform,
       d3.zoomIdentity,
       d3.zoomTransform(svg.node()).invert([width / 2, height / 2])
-    );
+    ).on('end', function(d) {
+      svg.selectAll("g.reset").remove();
+      zoomedIn = false;
+    });
 }
 
 function convert_to_ints(d){
@@ -374,6 +414,7 @@ function applySearchView(search_name) {
 
         }
        });
+       resetZoom();
 }
 
 var simulation = d3.forceSimulation()
