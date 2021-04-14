@@ -4,6 +4,7 @@ let searchOn = false;
 var natData = [];
 let newEnter = true;
 let zoomedIn = false;
+let current_search_name = "null";
 
 var width = container.offsetWidth;
 var height = container.offsetHeight;
@@ -143,8 +144,7 @@ function changeGender(genderInput) {
     view.select("text.gender").text("Female");
   }
   if (searchOn) {
-    search_name = document.getElementById("search-box").value
-    applySearchView(search_name)
+    applySearchView(current_search_name);
   }
   else {
     newEnter=true;
@@ -161,11 +161,7 @@ function filterEthnicity() {
     view.select("text.ethnicity").text(ethnicities);
   }
 
-  if (searchOn) {
-    search_name = document.getElementById("search-box").value
-    applySearchView(search_name)
-  }
-  else {
+  if (!searchOn) {
     applyData();
   }
 }
@@ -176,8 +172,7 @@ document.getElementById("year-filter").addEventListener("input", e=>{
   view.select("text.year").text(year);
 
   if (searchOn) {
-    search_name = document.getElementById("search-box").value
-    applySearchView(search_name)
+    applySearchView(current_search_name);
   }
   else {
     applyData();
@@ -185,12 +180,16 @@ document.getElementById("year-filter").addEventListener("input", e=>{
 });
 
 document.getElementById("search-button").addEventListener("click", e=>{
-    callSearchView()
+    search_name = document.getElementById("search-box").value
+    search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
+    callSearchView(search_name)
 });
 
 document.getElementById("search-box").addEventListener('keypress', function (e) {
   if (e.key === 'Enter') {
-    callSearchView()
+    search_name = document.getElementById("search-box").value
+    search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
+    callSearchView(search_name)
   }
 });
 
@@ -208,10 +207,8 @@ document.getElementById("cancel").addEventListener("click", e=> {
   newEnter = true;
 })
 
-function callSearchView() {
+function callSearchView(search_name) {
   searchOn = true;
-  search_name = document.getElementById("search-box").value
-  search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
@@ -234,6 +231,7 @@ function applySearchView(search_name) {
   svg.selectAll("g.tick").remove()
   svg.selectAll("g.bubble").remove() // remove all gs as well
   svg.attr("text-anchor", null);
+  current_search_name = search_name
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
           data = data.slice().sort((a, b) => d3.descending(a.Ethnicity, b.Ethnicity))
@@ -244,10 +242,13 @@ function applySearchView(search_name) {
           else {
             var gender = "FEMALE";
           }
-          data = data.filter(d=>d["Year of Birth"] == year);
-          data = data.filter(d=>d["Gender"] == gender);
+          data_all_years = data.filter(d=>d["Gender"] == gender);
+
+          data = data_all_years.filter(d=>d["Year of Birth"] == year);
 
           name_results = data.filter(d=>d["Child's First Name"] == search_name);
+          name_all_years = data_all_years.filter(d=>d["Child's First Name"] == search_name);
+
           if (name_results.length == 0) {
             var no_results_label = svg.append("g");
 
@@ -303,9 +304,9 @@ function applySearchView(search_name) {
                 .domain(name_results.map(d => d.key))
                 .range([height/3, 0]) // px
                 .padding(0.2)
-
+            
             xScale = d3.scaleLinear()
-                .domain([0, d3.max(name_results, d => d.Count)])
+                .domain([0, d3.max(name_all_years, d => d.Count)])
                 .range([0, width/2]) // px
 
             var search = svg.append("g");
