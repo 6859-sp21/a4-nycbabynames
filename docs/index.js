@@ -23,33 +23,45 @@ var svg = d3.select("#svgcontainer")
 const view = svg.append("g")
       .attr("cursor", "grab");
 
-const label = svg.append("g");
+function addLabel() {
+  const label = view.append("g");
+  let year = document.getElementById("year-filter").value;
+  let ethnicities = document.getElementById('ethnicity').value;
+  if (ethnicities == "ALL") {
+    ethnicities = "";
+  }
+  let gender = "Male";
+  if(document.getElementById("female-filter").checked) {
+    gender="Female";
+  }
 
-label.append("text")
-  .attr("class", "year")
-  .text("2011")
-  .style("font-size", "4rem")
-  .attr("text-anchor", "start")
-  .attr("x", "2rem")
-  .attr("y", "5rem")
-  .style("fill-opacity", 0.4);
+  label.append("text")
+    .attr("class", "year")
+    .text(year)
+    .style("font-size", "4rem")
+    .attr("text-anchor", "start")
+    .attr("x", "2rem")
+    .attr("y", "5rem")
+    .style("fill-opacity", 0.4);
 
-label.append("text")
-  .attr("class", "gender")
-  .text("Male")
-  .style("font-size", "2rem")
-  .attr("text-anchor", "start")
-  .attr("x", "2.2rem")
-  .attr("y", "7.5rem")
-  .style("fill-opacity", 0.7);
+  label.append("text")
+    .attr("class", "gender")
+    .text(gender)
+    .style("font-size", "2rem")
+    .attr("text-anchor", "start")
+    .attr("x", "2.2rem")
+    .attr("y", "7.5rem")
+    .style("fill-opacity", 0.7);
 
-label.append("text")
-  .attr("class", "ethnicity")
-  .style("font-size", "1.3rem")
-  .attr("text-anchor", "start")
-  .attr("x", "2.2rem")
-  .attr("y", "9.5rem")
-  .style("fill-opacity", 0.7);
+  label.append("text")
+    .attr("class", "ethnicity")
+    .text(ethnicities)
+    .style("font-size", "1.3rem")
+    .attr("text-anchor", "start")
+    .attr("x", "2.2rem")
+    .attr("y", "9.5rem")
+    .style("fill-opacity", 0.7);
+}
 
 var zoom = d3.zoom()
       .extent([[0, 0], [width, height]])
@@ -83,10 +95,10 @@ function convert_to_ints(d){
 function changeGender(genderInput) {
   if (genderInput==='male') {
     dataName = "male_names.csv";
-    label.select("text.gender").text("Male");
+    view.select("text.gender").text("Male");
   } else {
     dataName = "female_names.csv";
-    label.select("text.gender").text("Female");
+    view.select("text.gender").text("Female");
   }
   if (searchOn) {
     search_name = document.getElementById("search-box").value
@@ -95,14 +107,15 @@ function changeGender(genderInput) {
   else {
     applyData();
   }
+  resetZoom();
 }
 
 function filterEthnicity() {
   let ethnicities = document.getElementById('ethnicity').value;
   if (ethnicities == "ALL") {
-    label.select("text.ethnicity").text("");
+    view.select("text.ethnicity").text("");
   } else {
-    label.select("text.ethnicity").text(ethnicities);
+    view.select("text.ethnicity").text(ethnicities);
   }
 
   if (searchOn) {
@@ -119,7 +132,7 @@ function filterEthnicity() {
 document.getElementById("year-filter").addEventListener("input", e=>{
   let year = e.target.value;
   document.getElementById("year-selected").innerHTML = year;
-  label.select("text.year").text(year);
+  view.select("text.year").text(year);
 
   if (searchOn) {
     search_name = document.getElementById("search-box").value
@@ -149,6 +162,7 @@ document.getElementById("cancel").addEventListener("click", e=> {
   svg.selectAll("path").remove() // remove previous chart axis
   svg.selectAll("g.yAxis").remove() // remove line from axis
   svg.selectAll("g.tick").remove() // remove ticks from axis
+  addLabel();
   applyData();
 })
 
@@ -156,7 +170,6 @@ function callSearchView() {
   searchOn = true;
   search_name = document.getElementById("search-box").value
   search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
-  console.log(search_name)
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
   name_element.style.display = 'flex'
@@ -228,7 +241,7 @@ function applySearchView(search_name) {
             var i = 0
 
             for (item in name_results) {
-              name_results[i].key = i 
+              name_results[i].key = i
               if (name_results[i].Ethnicity == "HISPANIC") {
                 name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among Hispanic " + gender.toLowerCase() + " babies in " + year + "."
               }
@@ -276,17 +289,17 @@ function applySearchView(search_name) {
                   .attr('fill', '#404040')
                   .style('font-size', 'medium')
                   .text(d => d.Count)
-            
+
             yAxis = g => g
                 .attr("transform", `translate(${width/4},${height/8})`)
                 .attr("class", "yAxis")
                 .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
-            
+
             search.append("g")
                   .call(yAxis);
 
             for (item in name_results) {
-              search.append("text")                
+              search.append("text")
               .attr("class", "rank")
               .text(name_results[item].rankText)
               .style("font-size", "1rem")
@@ -297,14 +310,14 @@ function applySearchView(search_name) {
             }
 
             d3.csv("all_national_data_2010_2017.csv")
-                .then(data => { 
+                .then(data => {
                   if (gender == "MALE") {
                     var gen = "M";
                   }
                   else {
                     var gen = "F";
                   }
-                  
+
                   data1 = data.filter(d=>d["year"] == year);
                   data1 = data1.filter(d=>d["gender"] == gen);
 
@@ -340,7 +353,7 @@ function applySearchView(search_name) {
                     }
                   }
 
-                  search.append("text")                
+                  search.append("text")
                   .attr("class", "nat_rank")
                   .text(search_name + " was the #" + current_rank + " ranked name nationally for " + gender.toLowerCase() +" babies in " + year)
                   .style("font-size", "1rem")
@@ -348,8 +361,8 @@ function applySearchView(search_name) {
                   .attr("x", width/6)
                   .attr("y", height/2 + 30*name_results.length + 30)
                   .style("fill-opacity", 0.7);
-    
-                  search.append("text")                
+
+                  search.append("text")
                     .attr("class", "nat_rank")
                     .text(search_name + "'s rank " + change + " from #" + last_rank + " in " + (parseInt(year, 10) - 1).toString() + ".")
                     .style("font-size", "1rem")
@@ -372,7 +385,7 @@ var simulation = d3.forceSimulation()
                         view.selectAll("circle")
                           .attr("cx", function(d){ return d.x; })
                           .attr("cy", function(d){ return d.y; })
-                        view.selectAll("text")
+                        view.selectAll("text.circle-name")
                           .attr("x", function(d){ return d.x; })
                           .attr("y", function(d){ return d.y*1.005; })
                     });
@@ -475,9 +488,9 @@ function applyData() {
 
           var size = d3.scaleLinear()
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
-                      .range([width/80, width/20]); 
+                      .range([width/80, width/20]);
 
-          var g = view.selectAll("g").data(topData, d=>d["Child's First Name"]);
+          var g = view.selectAll("g.bubble").data(topData, d=>d["Child's First Name"]);
           var gEnter = g.enter().append("g").attr("class", "bubble");
 
           g.exit().remove();
@@ -492,8 +505,8 @@ function applyData() {
               .on("mousemove", updateTooltip)
               .on("mouseout", removeTooltip);
 
-
           gEnter.append('text')
+              .attr("class", "circle-name")
               .attr('text-anchor', "middle")
               .attr("font-size", function(d) {
                   return Math.round(size(d.Count)/3) + 'px';
@@ -542,5 +555,5 @@ function applyData() {
             .alpha(1).restart();
     });
   }
-
+addLabel();
 applyData();
