@@ -65,7 +65,7 @@ Ivana
 
 **Time Alloted:**
 
-[insert time estimate here]
+Roughly 50 person-hours.
 
 One component of the visualization that took surprisingly long to implement was having the bubbles
 stay in the same spot and grow/shrink rather than completely redrawing the visualization for
