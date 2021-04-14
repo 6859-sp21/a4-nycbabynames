@@ -2,7 +2,7 @@
 
 ## Write Up
 
-## Data
+### Data
 
 
 ### Design Decisions
