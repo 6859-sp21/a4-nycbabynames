@@ -2,21 +2,32 @@ body {
     height: 100vh;
 }
 
-h1 {
+h2 {
     color: white;
+}
+
+i {
+  margin: 0 auto;
+}
+
+p {
+  font-size: 0.9rem;
 }
 
 #cancel {
     display: none;
 }
 
+#reset {
+    display: none;
+}
+
 .filter-button {
-    font-size: 1.2rem;
-    padding: 5px;
+    font-size: 1rem;
 }
 
 .filter-dropdown {
-    font-size: 1.2rem;
+    font-size: 1rem;
     padding: 5px;
     background-color: #353535;
     color: #a6a6a6;
@@ -41,9 +52,10 @@ h1 {
 
 #search-box {
     color: #a6a6a6;
-    font-size: 1.2rem;
+    font-size: 1rem;
     padding: 5px;
     width: 80%;
+    height: 2rem;
 }
 
 #search-button {
@@ -52,9 +64,10 @@ h1 {
     border-left: none; /* Prevent double borders */
     color: white;
     cursor: pointer;
-    font-size: 17px;
-    padding: 10px;
+    font-size: 1rem;
+    /* padding: 10px; */
     width: 20%;
+    height: 2rem;
 }
 
 #search-button:hover {
