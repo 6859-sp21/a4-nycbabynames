@@ -98,7 +98,7 @@ h1 {
 
 /* remove tick lines on search view */
 .tick line{
-    visibility:hidden; 
+    visibility:hidden;
   }
 
 .tooltp {
@@ -109,6 +109,7 @@ h1 {
   padding-top: 10px;
   border: 1px solid black;
   border-radius: 5px;
+  display: none;
 }
 
 .tooltp>p {

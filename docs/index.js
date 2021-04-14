@@ -226,7 +226,7 @@ function applySearchView(search_name) {
             var i = 0
 
             for (item in name_results) {
-              name_results[i].key = i 
+              name_results[i].key = i
               if (name_results[i].Ethnicity == "HISPANIC") {
                 name_results[i].rankText = search_name + " was the #" + name_results[i].Rank + " most popular name among Hispanic " + gender.toLowerCase() + " babies in " + year + "."
               }
@@ -274,17 +274,17 @@ function applySearchView(search_name) {
                   .attr('fill', '#404040')
                   .style('font-size', 'medium')
                   .text(d => d.Count)
-            
+
             yAxis = g => g
                 .attr("transform", `translate(${width/4},${height/8})`)
                 .attr("class", "yAxis")
                 .call(d3.axisLeft(yScale).tickFormat(i => name_results[i].Ethnicity).tickSizeOuter(0))
-            
+
             search.append("g")
                   .call(yAxis);
 
             for (item in name_results) {
-              search.append("text")                
+              search.append("text")
               .attr("class", "rank")
               .text(name_results[item].rankText)
               .style("font-size", "1rem")
@@ -295,14 +295,14 @@ function applySearchView(search_name) {
             }
 
             d3.csv("all_national_data_1990_2019.csv")
-                .then(data => { 
+                .then(data => {
                   if (gender == "MALE") {
                     var gen = "M";
                   }
                   else {
                     var gen = "F";
                   }
-                  
+
                   data1 = data.filter(d=>d["year"] == year);
                   data1 = data1.filter(d=>d["gender"] == gen);
 
@@ -338,7 +338,7 @@ function applySearchView(search_name) {
                     }
                   }
 
-                  search.append("text")                
+                  search.append("text")
                   .attr("class", "nat_rank")
                   .text(search_name + " was the #" + current_rank + " ranked name nationally for " + gender.toLowerCase() +" babies in " + year)
                   .style("font-size", "1rem")
@@ -346,8 +346,8 @@ function applySearchView(search_name) {
                   .attr("x", width/6)
                   .attr("y", height/2 + 30*name_results.length + 30)
                   .style("fill-opacity", 0.7);
-    
-                  search.append("text")                
+
+                  search.append("text")
                     .attr("class", "nat_rank")
                     .text(search_name + "'s rank " + change + " from #" + last_rank + " in " + (parseInt(year, 10) - 1).toString() + ".")
                     .style("font-size", "1rem")
@@ -380,13 +380,17 @@ function rank(i) {
   return i > 0 ? "+"+i : i;
 }
 
+
+d3.csv("all_national_data_1990_2019.csv")
+  .then(d=>{console.log('test');natData=d})
 function createTooltip(e, d) {
   tooltip.style('display', 'inherit');
   tooltip.append('p').text(d["Child's First Name"]);
   let ul = tooltip.append('ul');
   ul.append('li').text('Babies: ' + d.Count);
+  if (d.natRank)
+    ul.append('li').text('National Rank: ' + d.natRank);
   ul.append('li').text('Rank Within Selection: ' + (d.selRank));
-  ul.append('li').text('National Rank: ' + d.natRank);
   if (d.delta) {
     let delta = d.delta-d.selRank;
     let li = ul.append('li');
@@ -397,7 +401,6 @@ function createTooltip(e, d) {
         .attr('src', imgSrc)
         .attr('width', '12px')
     }
-
   }
   updateTooltip(e,d);
 }
@@ -473,7 +476,7 @@ function applyData() {
 
           var size = d3.scaleLinear()
                       .domain([d3.min(topData, d=>d.Count), d3.max(topData, d=>d.Count)]) // range on name counts
-                      .range([width/80, width/20]); 
+                      .range([width/80, width/20]);
 
           var g = view.selectAll("g").data(topData, d=>d["Child's First Name"]);
           var gEnter = g.enter().append("g").attr("class", "bubble");
