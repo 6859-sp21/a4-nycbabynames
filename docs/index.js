@@ -158,7 +158,8 @@ function changeGender(genderInput) {
     svg.select("text.gender").text("Female");
   }
   if (searchOn) {
-    applySearchView(current_search_name);
+    year = document.getElementById("year-filter").value
+    applySearchView(current_search_name, year);
   }
   else {
     newEnter=true;
@@ -186,7 +187,7 @@ document.getElementById("year-filter").addEventListener("input", e=>{
   svg.select("text.year").text(year);
 
   if (searchOn) {
-    applySearchView(current_search_name);
+    applySearchView(current_search_name, year);
   }
   else {
     applyData();
@@ -196,14 +197,16 @@ document.getElementById("year-filter").addEventListener("input", e=>{
 document.getElementById("search-button").addEventListener("click", e=>{
     search_name = document.getElementById("search-box").value
     search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
-    callSearchView(search_name)
+    year = document.getElementById("year-filter").value
+    callSearchView(search_name, year)
 });
 
 document.getElementById("search-box").addEventListener('keypress', function (e) {
   if (e.key === 'Enter') {
     search_name = document.getElementById("search-box").value
     search_name = search_name[0].toUpperCase() + search_name.slice(1, search_name.length)
-    callSearchView(search_name)
+    year = document.getElementById("year-filter").value
+    callSearchView(search_name, year)
   }
 });
 
@@ -222,7 +225,7 @@ document.getElementById("cancel").addEventListener("click", e=> {
   newEnter = true;
 })
 
-function callSearchView(search_name) {
+function callSearchView(search_name, year) {
   searchOn = true;
   name_element = document.getElementById("search-name")
   name_element.innerHTML = search_name
@@ -233,11 +236,11 @@ function callSearchView(search_name) {
   cancel_button.style.display = 'flex'
   cancel_button.style.marginTop = '10px'
   cancel_button.style.marginRight = '10px'
-  applySearchView(search_name);
+  applySearchView(search_name, year);
 }
 
 
-function applySearchView(search_name) {
+function applySearchView(search_name, search_year) {
   svg.selectAll("circle").remove(); // remove bubble view
   svg.selectAll("text").remove() // the text from the bubbles and old charts
   svg.selectAll("rect").remove() // remove previous chart
@@ -247,11 +250,17 @@ function applySearchView(search_name) {
   svg.selectAll("g.bubble").remove() // remove all gs as well
   svg.selectAll("g.view").remove()
   svg.attr("text-anchor", null);
+
   current_search_name = search_name
   d3.csv("baby_names.csv", convert_to_ints)
        .then(data => {
           data = data.slice().sort((a, b) => d3.descending(a.Ethnicity, b.Ethnicity))
           let year = document.getElementById("year-filter").value
+
+          if (search_year != year) {
+            return // don't run while hard scrubbing
+          }
+
           if (document.getElementById("male-filter").checked) {
             var gender = "MALE";
           }
@@ -408,6 +417,12 @@ function applySearchView(search_name) {
                     if (parseInt(last_rank, 10) == parseInt(current_rank, 10)) {
                       change = "stayed the same"
                     }
+                  }
+
+                  year_again = document.getElementById("year-filter").value
+
+                  if (search_year != year_again) {
+                    return // don't run the old year nat data from a hard scrub
                   }
 
                   search.append("text")
